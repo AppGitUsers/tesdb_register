@@ -41,7 +41,7 @@
 <body>
 
 <div class="container">
-    <h2>Add New Batch</h2>
+    <h2>Add Or Edit New Batch</h2>
 
     <!-- Display success or error messages -->
     {% if messages %}
@@ -54,7 +54,7 @@
         </div>
     {% endif %}
 
-    <form method="POST" action="{% url 'add_batch' %}">
+    <form method="POST" >
         {% csrf_token %}
 
         <div class="mb-3 mt-3">
@@ -64,6 +64,7 @@
                 id="batch_name" 
                 name="batch_name" 
                 class="form-control" 
+                value="{{ batch.batch_name|default:'' }}"
                 placeholder="e.g. Morning Batch"
                 required>
         </div>
@@ -75,6 +76,7 @@
                 id="start_time" 
                 name="start_time" 
                 class="form-control"
+                value="{{ batch.start_time|time:'H:i' }}"
                 required>
         </div>
 
@@ -85,11 +87,12 @@
                 id="end_time" 
                 name="end_time" 
                 class="form-control"
+                value="{{ batch.end_time|time:'H:i' }}"
                 required>
         </div>
 
         <div class="text-center mt-4">
-            <button type="submit" class="btn btn-primary px-4">Add Batch</button>
+            <button type="submit" class="btn btn-primary px-4">submit</button>
             <a href="{% url 'get_batches' %}" class="btn btn-secondary px-4 ms-2">Back</a>
         </div>
     </form>

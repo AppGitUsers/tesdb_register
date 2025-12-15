@@ -16,6 +16,63 @@
             padding: 20px;
         }
         
+        .messages {
+            max-width: 1200px;
+            margin: 0 auto 20px auto;
+        }
+        
+        .alert {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+        
+        .alert-error {
+            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+            color: white;
+        }
+        
+        .alert-icon {
+            font-size: 24px;
+        }
+        
+        .alert-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        
+        .alert-close:hover {
+            opacity: 1;
+        }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -26,6 +83,7 @@
             justify-content: flex-end;
             margin-bottom: 20px;
         }
+        
         .logout {
             background: linear-gradient(135deg, #e97c7c 0%, #db0505 100%);
             color: white;
@@ -98,28 +156,18 @@
             padding: 10px;
         }
         
-        .batch-link {
-            text-decoration: none;
-        }
-        
-        .batch-card {
+        .batch-card-wrapper {
             background: white;
-            color: #2d3748;
-            padding: 30px;
-            border: none;
             border-radius: 12px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 16px;
-            transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: left;
-            width: 100%;
+            transition: all 0.3s;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         
-        .batch-card::before {
+        .batch-card-wrapper::before {
             content: '';
             position: absolute;
             top: 0;
@@ -128,23 +176,34 @@
             height: 100%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             transition: width 0.3s;
+            z-index: 0;
         }
         
-        .batch-card:hover {
+        .batch-card-wrapper:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
         
-        .batch-card:hover::before {
+        .batch-card-wrapper:hover::before {
             width: 100%;
             opacity: 0.1;
+        }
+        
+        .batch-content {
+            padding: 30px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
         }
         
         .batch-name {
             font-size: 20px;
             font-weight: 600;
             color: #2d3748;
-            margin-bottom: 12px;
             display: block;
         }
         
@@ -161,6 +220,65 @@
             font-size: 18px;
         }
         
+        .batch-card-buttons {
+            padding: 0 30px 25px 30px;
+            display: flex;
+            gap: 12px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .edit-btn {
+            flex: 1;
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 10px rgba(66, 153, 225, 0.3);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4);
+            background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+        }
+        
+        .delete-btn {
+            flex: 1;
+            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 10px rgba(252, 129, 129, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(252, 129, 129, 0.4);
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+        
         .empty-state {
             background: white;
             padding: 60px 40px;
@@ -168,6 +286,7 @@
             text-align: center;
             color: #718096;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            grid-column: 1 / -1;
         }
         
         .empty-state-icon {
@@ -182,6 +301,127 @@
             color: #4a5568;
         }
         
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+            position: relative;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 25px;
+            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        .modal-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .modal-message {
+            font-size: 16px;
+            color: #718096;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .modal-batch-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .modal-btn-cancel {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .modal-btn-cancel:hover {
+            background: #cbd5e0;
+            transform: translateY(-2px);
+        }
+        
+        .modal-btn-delete {
+            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(252, 129, 129, 0.3);
+        }
+        
+        .modal-btn-delete:hover {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(252, 129, 129, 0.4);
+        }
+        
         @media (max-width: 768px) {
             .batchContainer {
                 grid-template-columns: 1fr;
@@ -194,10 +434,29 @@
             .header h1 {
                 font-size: 26px;
             }
+            
+            .batch-card-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Messages Display -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                <span class="alert-icon">
+                    {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}⚠{% endif %}
+                </span>
+                <span>{{ message }}</span>
+                <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="container">
         <div class="top-bar">
             <a href="{% url 'staff_logout' %}" class="logout">Logout</a>
@@ -213,12 +472,24 @@
 
         <div class="batchContainer">
             {% for batch in batches %}
-                <a href="{% url 'student_list' batch.batch_id %}" class="batch-link">
-                    <button class="batch-card">
+                <div class="batch-card-wrapper">
+                    <div class="batch-content" onclick="window.location.href='{% url 'student_list' batch.batch_id %}'">
                         <span class="batch-name">{{batch.batch_name}}</span>
                         <span class="batch-time">{{batch.start_time}} - {{batch.end_time}}</span>
-                    </button>
-                </a>
+                    </div>
+                    
+                    <div class="batch-card-buttons">
+                        <a href="{% url 'edit_batch' batch.batch_id %}" class="edit-btn">
+                            <span>✏️</span>
+                            <span>Edit</span>
+                        </a>
+                        
+                        <button type="button" class="delete-btn" onclick="openDeleteModal('{{batch.batch_id}}', '{{batch.batch_name}}')">
+                            <span>🗑️</span>
+                            <span>Delete</span>
+                        </button>
+                    </div>
+                </div>
             {% empty %}
                 <div class="empty-state">
                     <div class="empty-state-icon">📚</div>
@@ -227,5 +498,70 @@
             {% endfor %}
         </div>
     </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-overlay" onclick="closeDeleteModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-icon">⚠️</div>
+            <h2 class="modal-title">Delete Batch?</h2>
+            <p class="modal-message">
+                Are you sure you want to delete <span class="modal-batch-name" id="modalBatchName"></span>? 
+                This action cannot be undone.
+            </p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <form id="deleteForm" method="POST" style="flex: 1;">
+                    {% csrf_token %}
+                    <button type="submit" class="modal-btn modal-btn-delete" style="width: 100%;">Delete Batch</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentBatchId = null;
+        let currentBatchName = null;
+        
+        function openDeleteModal(batchId, batchName) {
+            currentBatchId = batchId;
+            currentBatchName = batchName;
+            
+            // Update modal content
+            document.getElementById('modalBatchName').textContent = batchName;
+            
+            // Update form action - matches your Django URL pattern
+            const form = document.getElementById('deleteForm');
+            form.action = '{% url "delete_batch" 0 %}'.replace('0', batchId);
+            
+            // Show modal
+            document.getElementById('deleteModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeDeleteModal(event) {
+            if (!event || event.target.id === 'deleteModal') {
+                document.getElementById('deleteModal').classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeDeleteModal();
+            }
+        });
+        
+        // Auto-hide messages after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s, transform 0.5s';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-20px)';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
 </body>
 </html>

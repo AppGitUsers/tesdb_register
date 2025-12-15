@@ -47,7 +47,7 @@ class Student(models.Model):
     student_contact = models.CharField(max_length=20, blank=True)
     # BATCH_CHOICES = [
     #     (True, 'Morning'),
-    #     (False, 'Afternoon'),
+    #     (F`alse, 'Afternoon'),
     # ]
     # batch = models.BooleanField(choices=BATCH_CHOICES, default=True)
     

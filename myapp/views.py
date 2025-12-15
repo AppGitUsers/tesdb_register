@@ -189,6 +189,7 @@ def staff_login(request):
             messages.error(request, "Invalid username or password.")
     return render(request, 'staff_login.html')
 
+
 @login_required
 def add_batch(request):
     staff=get_object_or_404(Staff,user=request.user)
@@ -196,6 +197,12 @@ def add_batch(request):
         batch_name=request.POST["batch_name"]
         start_time=request.POST["start_time"]
         end_time=request.POST["end_time"]
+        if not batch_name or not start_time or not end_time:
+            messages.error(request, "All fields are required.")
+            return redirect("add_batch")
+        if Batch.objects.filter(staff=staff, batch_name=batch_name).exists():
+            messages.error(request, "!!!Batch with this name already exists.")
+            return redirect("add_batch")
 
         Batch.objects.create(
             staff=staff,
@@ -206,11 +213,44 @@ def add_batch(request):
 
         messages.success(request,"NEW BATCH ADDED SCCESSFULLY")
         return redirect("get_batches")
+    
     return render(request,"add_batch.html")
 
+@login_required
+def edit_batch(request,batch_id):
+    staff=get_object_or_404(Staff,user=request.user)
+    batch=get_object_or_404(Batch,pk=batch_id,staff=staff)
+    if request.method=="POST":
+        batch_name=request.POST["batch_name"]
+        start_time=request.POST["start_time"]
+        end_time=request.POST["end_time"]
+        if not batch_name or not start_time or not end_time:
+            messages.error(request, "All fields are required.")
+            return redirect("edit_batch",batch_id=batch_id)
+        
+        batch.batch_name=batch_name
+        batch.start_time=start_time
+        batch.end_time=end_time
+        batch.save()
+        messages.success(request,"BATCH UPDATED SCCESSFULLY")
+        return redirect('get_batches')
+    return render(request,"add_batch.html",{"batch":batch})
 
 
+@login_required
+def delete_batch(request, batch_id):
+    staff = get_object_or_404(Staff, user=request.user)
+    batch = get_object_or_404(Batch, pk=batch_id, staff=staff)
 
+
+    if request.method == "POST":
+        student_count=Student.objects.filter(batch=batch).count()
+        if student_count>0:
+            messages.error(request, "Cannot delete batch with assigned students.")
+            return redirect('get_batches')
+        batch.delete()
+        messages.success(request, "Batch deleted successfully.")
+        return redirect('get_batches')
 
 @login_required
 def mark_student_attendance(request,batch_id):
@@ -272,6 +312,9 @@ def getBatches(request):
     staff= get_object_or_404(Staff, user=request.user)
     batches = Batch.objects.filter(staff=staff).order_by('start_time')
     return render(request, 'batch.html', {'batches': batches,'staff':staff})
+
+
+    # return render(request, 'confirm_delete.html', {'batch': batch})
 
 def staff_logout(request):
     logout(request)
