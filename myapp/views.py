@@ -197,12 +197,11 @@ def add_batch(request):
         batch_name=request.POST["batch_name"]
         start_time=request.POST["start_time"]
         end_time=request.POST["end_time"]
-        if not batch_name or not start_time or not end_time:
-            messages.error(request, "All fields are required.")
-            return redirect("add_batch")
-        if Batch.objects.filter(staff=staff, batch_name=batch_name).exists():
-            messages.error(request, "!!!Batch with this name already exists.")
-            return redirect("add_batch")
+        
+        # --- VALIDATION: start_time must be less than end_time ---
+        if start_time >= end_time:
+            messages.error(request, "Start time must be less than End time.")
+            return redirect("add_batch")  # Redirect back to same page
 
         Batch.objects.create(
             staff=staff,
