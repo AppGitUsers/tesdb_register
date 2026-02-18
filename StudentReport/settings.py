@@ -33,6 +33,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATIC_URL = '/static/'
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 
 # Allowed IP or WiFi gateways for attendance marking
 ALLOWED_WIFI_IPS = ["192.168.1.21", "2401:4900:88e4:cb03:94ac:daad:7e6a:840b","192.168.1.68"]  
