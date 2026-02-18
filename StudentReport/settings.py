@@ -106,7 +106,7 @@ WSGI_APPLICATION = 'StudentReport.wsgi.application'
 # }
 DATABASES = {
     'default': dj_database_url.parse(
-        os.environ.get("postgresql://postgres:Tesdb@supabase2026@db.zdtlprqidtpetvpuygib.supabase.co:5432/postgres")
+        os.environ.get("DATABASE_URL")
     )
 }
 
