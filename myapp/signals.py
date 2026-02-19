@@ -95,6 +95,10 @@ def mark_attendance(sender, request, user, **kwargs):
             print(f"✅ Attendance (Unverified WiFi) marked for {staff.staff_name} on {today} {ip}")
         else:
             print(f"⚠️ Attendance (Unverified) already exists for {staff.staff_name} on {today} {ip}")
+            
+    print("DEBUG IP:", repr(ip))
+    print("DEBUG SETTINGS ALLOWED:", repr(getattr(settings, "ALLOWED_WIFI_IPS", [])))
+
 
     print(f"   🌐 Final IP used: {ip}")
     print(f"   📶 WiFi Verified: {wifi_verified}")
