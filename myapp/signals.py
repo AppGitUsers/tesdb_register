@@ -56,14 +56,17 @@ Admin Team
         recipient = staff.staff_email or staff.user.email
 
         if recipient:
-            send_mail(
-                subject,
-                message,
-                None,  # DEFAULT_FROM_EMAIL
-                [recipient],
-                fail_silently=False,
-            )
-            print(f"✅ Notification email sent to {recipient} for new student {instance.student_name}.")
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    None,  # DEFAULT_FROM_EMAIL
+                    [recipient],
+                    fail_silently=False,
+                )
+                print(f"✅ Notification email sent to {recipient} for new student {instance.student_name}.")
+            except Exception as e:
+                print("email failed : ",e)
         else:
             print(f"⚠️ No email found for staff {staff.staff_name}.")
 
