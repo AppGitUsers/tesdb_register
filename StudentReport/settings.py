@@ -157,13 +157,16 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER =   os.environ.get("EMAIL_HOST_USER")                        #'vishvasen912@gmail.com'   # admin email
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")#'zkpa srwy wodm lnnf' # app-specific password, not Gmail password
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+EMAIL_USE_TLS = False
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER =   os.environ.get("EMAIL_HOST_USER")                        #'vishvasen912@gmail.com'   # admin email
+# EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")# # app-specific password, not Gmail password
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 # Redirect users after login
