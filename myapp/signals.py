@@ -107,19 +107,22 @@ def mark_attendance(sender, request, user, **kwargs):
     print(f"   📶 WiFi Verified: {wifi_verified}")
 
 def get_client_ip(request):
-    """Extract client IP from request headers"""
+    """Get client IP address from request"""
+    print("META HEADERS:", request.META)
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+
     if x_forwarded_for:
-        ip = x_forwarded_for.split(",")[0]
-        print(f"🔎 Found IP from X-Forwarded-For: {ip}")
-    else:
-        ip = request.META.get("REMOTE_ADDR")
-        print(f"🔎 Found IP from REMOTE_ADDR: {ip}")
-    # If running locally (127.0.0.1 / ::1), fetch actual WiFi IP
-    if ip in ("127.0.0.1", "::1"):
-        wifi_ip = get_local_ip()
-        print(f"💡 Localhost detected, replacing with WiFi IP: {wifi_ip}")
-        return wifi_ip
-    print(f"🌐 Detected client IP in Django: {ip}")
+        ip = x_forwarded_for.split(",")[0].strip()
+        print(f"🔎 IP from X-Forwarded-For: {ip}")
+        return ip
+
+    x_real_ip = request.META.get("HTTP_X_REAL_IP")
+    if x_real_ip:
+        print(f"🔎 IP from X-Real-IP: {x_real_ip}")
+        return x_real_ip
+
+    ip = request.META.get("REMOTE_ADDR")
+    print(f"🔎 IP from REMOTE_ADDR: {ip}")
+
     return ip
 
