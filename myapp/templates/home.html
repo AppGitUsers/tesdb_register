@@ -1,219 +1,290 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Course Tracking</title>
+    <title>TESDB — Course Tracking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #0a0a0f;
+            --bg2: #12121a;
+            --bg3: #1a1a26;
+            --border: #2a2a3d;
+            --accent: #6c63ff;
+            --accent2: #ff6584;
+            --accent3: #43e97b;
+            --accent4: #f7971e;
+            --text: #e8e8f0;
+            --muted: #6b6b8a;
+            --card: #15151f;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            justify-content: center;
             position: relative;
             overflow: hidden;
         }
 
+        /* Animated grid background */
         body::before {
             content: '';
             position: absolute;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: moveBackground 20s linear infinite;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(108,99,255,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(108,99,255,0.06) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0%   { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
         }
 
-        @keyframes moveBackground {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
+        /* Glowing orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float 8s ease-in-out infinite;
+        }
+        .orb-1 {
+            width: 400px; height: 400px;
+            background: var(--accent);
+            top: -100px; left: -100px;
+            animation-delay: 0s;
+        }
+        .orb-2 {
+            width: 300px; height: 300px;
+            background: var(--accent2);
+            bottom: -80px; right: -80px;
+            animation-delay: -4s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50%       { transform: translate(30px, 20px) scale(1.05); }
         }
 
-        .container {
-            position: relative;
-            z-index: 1;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 60px 80px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        /* Main card */
+        .card {
+            position: relative; z-index: 1;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 56px 64px;
+            width: 90%;
+            max-width: 680px;
             text-align: center;
-            backdrop-filter: blur(10px);
-            animation: fadeInUp 0.8s ease;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+            animation: fadeUp 0.7s cubic-bezier(.16,1,.3,1) both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(32px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .logo {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 20px;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        h2 {
-            color: #333;
-            font-size: 2.5em;
-            margin-bottom: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        h1 {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            line-height: 1.15;
+            margin-bottom: 14px;
+        }
+        h1 span {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: fadeIn 1s ease 0.3s both;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .subtitle {
+            font-size: 15px;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 48px;
         }
 
-        .links-container {
+        /* Portal cards */
+        .portals {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .portal {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 20px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.25s cubic-bezier(.16,1,.3,1);
             display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .link-card {
-            flex: 1;
-            min-width: 200px;
-            max-width: 250px;
-            padding: 30px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
             position: relative;
             overflow: hidden;
-            animation: slideIn 0.6s ease forwards;
-            opacity: 0;
         }
-
-        .link-card:nth-child(1) {
-            animation-delay: 0.4s;
-        }
-
-        .link-card:nth-child(2) {
-            animation-delay: 0.6s;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .link-card::before {
+        .portal::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .link-card:hover::before {
-            left: 100%;
-        }
-
-        .link-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
-        }
-
-        .icon {
-            font-size: 3em;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        .admin-icon {
-            color: #667eea;
-        }
-
-        .user-icon {
-            color: #764ba2;
-        }
-
-        .link-card a {
-            text-decoration: none;
-            color: #333;
-            font-size: 1.2em;
-            font-weight: 600;
-            display: block;
-            position: relative;
-        }
-
-        .link-card a::after {
-            content: '→';
-            position: absolute;
-            right: -25px;
+            inset: 0;
             opacity: 0;
-            transition: all 0.3s ease;
+            transition: opacity 0.25s;
         }
+        .portal:hover { transform: translateY(-4px); border-color: transparent; }
+        .portal:hover::before { opacity: 1; }
 
-        .link-card:hover a::after {
-            right: -30px;
+        /* Admin portal */
+        .portal-admin::before {
+            background: linear-gradient(135deg, rgba(108,99,255,0.12), rgba(108,99,255,0.04));
+            border: 1px solid rgba(108,99,255,0.4);
+            border-radius: 16px;
+            inset: -1px;
+        }
+        .portal-admin:hover { box-shadow: 0 16px 40px rgba(108,99,255,0.2); }
+
+        /* Staff portal */
+        .portal-staff::before {
+            background: linear-gradient(135deg, rgba(67,233,123,0.12), rgba(67,233,123,0.04));
+            border: 1px solid rgba(67,233,123,0.4);
+            border-radius: 16px;
+            inset: -1px;
+        }
+        .portal-staff:hover { box-shadow: 0 16px 40px rgba(67,233,123,0.2); }
+
+        /* Django admin portal */
+        .portal-django::before {
+            background: linear-gradient(135deg, rgba(247,151,30,0.12), rgba(247,151,30,0.04));
+            border: 1px solid rgba(247,151,30,0.4);
+            border-radius: 16px;
+            inset: -1px;
+        }
+        .portal-django:hover { box-shadow: 0 16px 40px rgba(247,151,30,0.2); }
+
+        .portal-icon {
+            font-size: 32px;
+            position: relative; z-index: 1;
+        }
+        .portal-label {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            position: relative; z-index: 1;
+        }
+        .portal-desc {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.5;
+            position: relative; z-index: 1;
+        }
+        .portal-badge {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
+            position: relative; z-index: 1;
+        }
+        .badge-admin  { background: rgba(108,99,255,0.2); color: #a29bfe; }
+        .badge-staff  { background: rgba(67,233,123,0.2); color: #43e97b; }
+        .badge-django { background: rgba(247,151,30,0.2); color: #f7971e; }
+
+        /* Arrow on hover */
+        .portal-arrow {
+            font-size: 18px;
+            position: relative; z-index: 1;
+            opacity: 0;
+            transform: translateX(-6px);
+            transition: all 0.2s;
+        }
+        .portal:hover .portal-arrow {
             opacity: 1;
+            transform: translateX(0);
         }
 
-        .link-description {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 10px;
+        /* Divider */
+        .divider {
+            display: flex; align-items: center; gap: 16px;
+            margin: 36px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1;
+            height: 1px; background: var(--border);
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 40px 30px;
-            }
-
-            h2 {
-                font-size: 2em;
-            }
-
-            .links-container {
-                flex-direction: column;
-            }
-
-            .link-card {
-                max-width: 100%;
-            }
+        @media (max-width: 600px) {
+            .card { padding: 36px 24px; }
+            h1 { font-size: 28px; }
+            .portals { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Welcome to Course Tracking</h2>
-        <div class="links-container">
-            <div class="link-card">
-                <span class="icon admin-icon">⚙️</span>
-                <a href="/admin/">Go to Admin</a>
-                <p class="link-description">Manage system settings</p>
-            </div>
-            <div class="link-card">
-                <span class="icon user-icon">👤</span>
-                <a href="{% url 'staff_login' %}">Go to User</a>
-                <p class="link-description">Access your dashboard</p>
-            </div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="card">
+        <div class="logo">TESDB</div>
+        <h1>Course <span>Tracking</span><br>System</h1>
+        <p class="subtitle">Manage students, staff, batches, attendance<br>and topic progress — all in one place.</p>
+
+        <div class="portals">
+
+            <!-- Custom Admin Dashboard -->
+            <a href="/admin-dashboard/" class="portal portal-admin">
+                <div class="portal-icon">⬛</div>
+                <div class="portal-label">Admin Dashboard</div>
+                <div class="portal-desc">Real-time stats, manage students, staff & courses</div>
+                <span class="portal-badge badge-admin">Superadmin</span>
+                <div class="portal-arrow">→</div>
+            </a>
+
+            <!-- Staff Login -->
+            <a href="{% url 'staff_login' %}" class="portal portal-staff">
+                <div class="portal-icon">🧑‍🏫</div>
+                <div class="portal-label">Staff Portal</div>
+                <div class="portal-desc">Manage your batches, students & attendance</div>
+                <span class="portal-badge badge-staff">Staff</span>
+                <div class="portal-arrow">→</div>
+            </a>
+
+            <!-- Django Admin (raw) -->
+            <a href="/admin/" class="portal portal-django">
+                <div class="portal-icon">⚙️</div>
+                <div class="portal-label">Django Admin</div>
+                <div class="portal-desc">Raw database management & advanced settings</div>
+                <span class="portal-badge badge-django">Advanced</span>
+                <div class="portal-arrow">→</div>
+            </a>
+
         </div>
+
+        <div class="divider">v1.0 · TESDB Platform</div>
     </div>
 </body>
 </html>

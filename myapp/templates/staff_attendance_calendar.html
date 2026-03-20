@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance — {{ staff.staff_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;
+            --border:#2a2a3d;--accent:#6c63ff;--accent2:#ff6584;
+            --accent3:#43e97b;--accent4:#f7971e;--text:#e8e8f0;--muted:#6b6b8a;--card:#15151f;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px;}
+        .container{max-width:1100px;margin:0 auto;}
+
+        /* ── Top bar ── */
+        .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:14px;}
+        .top-bar h1{font-size:22px;font-weight:700;}
+        .top-bar .sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:4px;text-transform:uppercase;letter-spacing:2px;}
+        .back-btn{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);color:var(--muted);padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;transition:all 0.2s;}
+        .back-btn:hover{border-color:var(--accent);color:var(--text);}
+
+        /* ── Alert ── */
+        .alert{padding:12px 16px;border-radius:9px;margin-bottom:20px;font-size:13px;display:flex;align-items:center;gap:10px;}
+        .alert-success{background:rgba(67,233,123,0.1);border:1px solid rgba(67,233,123,0.3);color:var(--accent3);}
+        .alert-error{background:rgba(255,101,132,0.1);border:1px solid rgba(255,101,132,0.3);color:var(--accent2);}
+
+        /* ── Stats row ── */
+        .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px;}
+        .stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+        .stat-val{font-size:30px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:-1px;}
+        .stat-label{font-size:12px;color:var(--muted);margin-top:4px;}
+        .stat-green{color:var(--accent3);}
+        .stat-red{color:var(--accent2);}
+        .stat-blue{color:#74b9ff;}
+        .stat-orange{color:var(--accent4);}
+
+        /* ── Progress bar ── */
+        .pct-bar-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:24px;}
+        .pct-labels{display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;}
+        .pct-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;}
+        .pct-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent3));transition:width 0.8s ease;}
+
+        /* ── Leave card ── */
+        .leave-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;}
+        .leave-card h3{font-size:15px;font-weight:600;margin-bottom:14px;}
+        .leave-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+        .leave-item{background:var(--bg3);border-radius:9px;padding:14px 16px;}
+        .leave-item .lval{font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+        .leave-item .llabel{font-size:11px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px;}
+        .locked-msg{font-size:13px;color:var(--muted);padding:12px;background:var(--bg3);border-radius:8px;border:1px dashed var(--border);}
+
+        /* ── Calendar nav ── */
+        .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+        .cal-title{font-size:18px;font-weight:700;}
+        .nav-btns{display:flex;gap:8px;}
+        .nav-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.2s;font-family:'Space Grotesk',sans-serif;}
+        .nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+        /* ── Calendar grid ── */
+        .cal-grid{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+        .day-headers{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);}
+        .day-header{padding:10px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+        .day-header.sun{color:var(--accent2);}
+        .cal-weeks{}
+        .cal-week{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);}
+        .cal-week:last-child{border-bottom:none;}
+
+        .day-cell{
+            min-height:72px;padding:10px;position:relative;
+            border-right:1px solid var(--border);cursor:default;
+            transition:background 0.15s;
+        }
+        .day-cell:last-child{border-right:none;}
+        .day-cell.empty{background:var(--bg2);}
+        .day-cell.sunday{background:rgba(255,101,132,0.03);}
+        .day-cell.present{background:rgba(67,233,123,0.08);}
+        .day-cell.absent{background:rgba(255,101,132,0.06);}
+        .day-cell.future{opacity:0.4;}
+        .day-cell.today-cell{outline:2px solid var(--accent);outline-offset:-2px;}
+
+        .day-num{font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+        .day-num.sun-num{color:var(--accent2);}
+
+        .day-badge{
+            margin-top:6px;display:inline-block;padding:2px 8px;
+            border-radius:5px;font-size:10px;font-weight:700;letter-spacing:0.5px;
+        }
+        .badge-present{background:rgba(67,233,123,0.2);color:var(--accent3);}
+        .badge-absent{background:rgba(255,101,132,0.2);color:var(--accent2);}
+        .badge-sunday{background:rgba(255,101,132,0.1);color:var(--accent2);}
+        .badge-leave{background:rgba(247,151,30,0.2);color:var(--accent4);}
+        .badge-wifi{font-size:9px;color:var(--accent3);opacity:0.8;display:block;margin-top:2px;}
+
+        /* Admin mark buttons */
+        .day-actions{display:flex;flex-direction:column;gap:3px;margin-top:6px;}
+        .mark-btn{
+            font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;
+            border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;
+            transition:all 0.15s;text-align:center;
+        }
+        .mark-present-btn{background:rgba(67,233,123,0.2);color:var(--accent3);}
+        .mark-present-btn:hover{background:rgba(67,233,123,0.35);}
+        .mark-absent-btn{background:rgba(255,101,132,0.2);color:var(--accent2);}
+        .mark-absent-btn:hover{background:rgba(255,101,132,0.35);}
+        .mark-leave-btn{background:rgba(247,151,30,0.2);color:var(--accent4);}
+        .mark-leave-btn:hover{background:rgba(247,151,30,0.35);}
+
+        /* ── Legend ── */
+        .legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;font-size:12px;}
+        .legend-item{display:flex;align-items:center;gap:7px;}
+        .legend-dot{width:12px;height:12px;border-radius:3px;}
+        .ld-present{background:rgba(67,233,123,0.3);}
+        .ld-absent{background:rgba(255,101,132,0.3);}
+        .ld-sunday{background:rgba(255,101,132,0.08);border:1px dashed rgba(255,101,132,0.3);}
+        .ld-future{background:var(--bg3);opacity:0.5;}
+
+        /* ── Summary history ── */
+        .summary-section{margin-top:28px;}
+        .summary-section h3{font-size:15px;font-weight:600;margin-bottom:14px;}
+        .summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+        .summary-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+        .summary-month{font-size:14px;font-weight:700;margin-bottom:10px;}
+        .summary-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:8px;}
+        .summary-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent3));}
+        .summary-stats{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;}
+
+        @media(max-width:640px){
+            .day-cell{min-height:50px;padding:6px;}
+            .day-num{font-size:11px;}
+            .day-actions{display:none;}
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Top bar -->
+    <div class="top-bar">
+        <div>
+            <div class="sub">Attendance</div>
+            <h1>📅 {{ staff.staff_name }}</h1>
+        </div>
+        {% if readonly %}
+        <a href="{% url 'get_batches' %}" class="back-btn">← Dashboard</a>
+        {% else %}
+        <a href="{% url 'admin_dashboard' %}" class="back-btn">← Admin Dashboard</a>
+        {% endif %}
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        <span>{% if message.tags == 'success' %}✓{% else %}⚠{% endif %}</span>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-val stat-green">{{ cal.present_days }}</div>
+            <div class="stat-label">Present this month</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val stat-red">{{ cal.absent_days }}</div>
+            <div class="stat-label">Absent this month</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val stat-blue">{{ cal.total_working_days }}</div>
+            <div class="stat-label">Working days</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val stat-orange">{{ cal.attendance_pct }}%</div>
+            <div class="stat-label">Attendance rate</div>
+        </div>
+    </div>
+
+    <!-- Attendance % bar -->
+    <div class="pct-bar-wrap">
+        <div class="pct-labels">
+            <span>Attendance — {{ cal.month_name }} {{ cal.year }}</span>
+            <span style="color:var(--accent3);font-weight:700;">{{ cal.attendance_pct }}%</span>
+        </div>
+        <div class="pct-bar">
+            <div class="pct-fill" style="width:{{ cal.attendance_pct }}%"></div>
+        </div>
+    </div>
+
+    <!-- Leave card -->
+    <div class="leave-card">
+        <h3>🌴 Paid Leave</h3>
+        {% if leave_unlocked %}
+        <div class="leave-grid">
+            <div class="leave-item">
+                <div class="lval" style="color:var(--accent3);">{{ leave_obj.leave_balance }}</div>
+                <div class="llabel">Available Days</div>
+            </div>
+            <div class="leave-item">
+                <div class="lval" style="color:var(--accent2);">{{ leave_obj.leave_used }}</div>
+                <div class="llabel">Used Days</div>
+            </div>
+            <div class="leave-item">
+                <div class="lval" style="color:var(--muted);">1/month</div>
+                <div class="llabel">Credit Rate</div>
+            </div>
+            <div class="leave-item">
+                <div class="lval" style="color:var(--accent4);">{{ leave_obj.join_date }}</div>
+                <div class="llabel">Join Date</div>
+            </div>
+        </div>
+        {% else %}
+        <div class="locked-msg">
+            🔒 Paid leave unlocks on <strong>{{ unlock_date }}</strong>
+            (3 months after joining on {{ leave_obj.join_date }}).
+            After that, 1 day is credited every month automatically.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Calendar navigation -->
+    <div class="cal-header">
+        <div class="cal-title">{{ cal.month_name }} {{ cal.year }}</div>
+        <div class="nav-btns">
+            <a href="?year={{ prev_year }}&month={{ prev_month }}" class="nav-btn">← Prev</a>
+            <a href="?year={{ today.year }}&month={{ today.month }}" class="nav-btn">Today</a>
+            <a href="?year={{ next_year }}&month={{ next_month }}" class="nav-btn">Next →</a>
+        </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="cal-grid">
+        <div class="day-headers">
+            <div class="day-header sun">Sun</div>
+            <div class="day-header">Mon</div>
+            <div class="day-header">Tue</div>
+            <div class="day-header">Wed</div>
+            <div class="day-header">Thu</div>
+            <div class="day-header">Fri</div>
+            <div class="day-header">Sat</div>
+        </div>
+        <div class="cal-weeks">
+            {% for week in cal.weeks %}
+            <div class="cal-week">
+                {% for cell in week %}
+                {% if cell is None %}
+                <div class="day-cell empty"></div>
+                {% else %}
+                <div class="day-cell
+                    {% if cell.is_sunday %}sunday
+                    {% elif cell.is_future %}future
+                    {% elif cell.is_present %}present
+                    {% elif cell.is_absent %}absent
+                    {% endif %}
+                    {% if cell.date == today %}today-cell{% endif %}
+                ">
+                    <div class="day-num {% if cell.is_sunday %}sun-num{% endif %}">{{ cell.day }}</div>
+
+                    {% if cell.is_sunday %}
+                        <span class="day-badge badge-sunday">Holiday</span>
+                    {% elif cell.is_future %}
+                        {# nothing #}
+                    {% elif cell.is_present %}
+                        <span class="day-badge badge-present">Present</span>
+                        {% if cell.att and cell.att.wifi_verified %}
+                        <span class="badge-wifi">📶 WiFi</span>
+                        {% endif %}
+                    {% elif cell.is_absent %}
+                        {# check if paid leave #}
+                        {% with lu=cell.date %}
+                        <span class="day-badge badge-absent">Absent</span>
+                        {% endwith %}
+                    {% endif %}
+
+                    <!-- Admin action buttons (hidden on readonly) -->
+                    {% if not readonly and not cell.is_sunday and not cell.is_future %}
+                    <div class="day-actions">
+                        {% if not cell.is_present %}
+                        <form method="POST" style="margin:0">
+                            {% csrf_token %}
+                            <input type="hidden" name="date" value="{{ cell.date|date:'Y-m-d' }}">
+                            <input type="hidden" name="action" value="mark_present">
+                            <button class="mark-btn mark-present-btn" type="submit">✓ Present</button>
+                        </form>
+                        {% endif %}
+                        {% if not cell.is_absent %}
+                        <form method="POST" style="margin:0">
+                            {% csrf_token %}
+                            <input type="hidden" name="date" value="{{ cell.date|date:'Y-m-d' }}">
+                            <input type="hidden" name="action" value="mark_absent">
+                            <input type="hidden" name="leave_type" value="absent">
+                            <button class="mark-btn mark-absent-btn" type="submit">✕ Absent</button>
+                        </form>
+                        {% if leave_unlocked and leave_obj.leave_balance >= 1 %}
+                        <form method="POST" style="margin:0">
+                            {% csrf_token %}
+                            <input type="hidden" name="date" value="{{ cell.date|date:'Y-m-d' }}">
+                            <input type="hidden" name="action" value="mark_absent">
+                            <input type="hidden" name="leave_type" value="paid">
+                            <button class="mark-btn mark-leave-btn" type="submit">🌴 P.Leave</button>
+                        </form>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-item"><div class="legend-dot ld-present"></div> Present</div>
+        <div class="legend-item"><div class="legend-dot ld-absent"></div> Absent</div>
+        <div class="legend-item"><div class="legend-dot ld-sunday"></div> Sunday (Holiday)</div>
+        <div class="legend-item"><div class="legend-dot ld-future"></div> Future</div>
+    </div>
+
+    <!-- Monthly summaries (admin only) -->
+    {% if summaries %}
+    <div class="summary-section">
+        <h3>📊 Previous Months</h3>
+        <div class="summary-cards">
+            {% for s in summaries %}
+            <div class="summary-card">
+                <div class="summary-month">{{ s.month_name }} {{ s.year }}</div>
+                <div class="summary-bar">
+                    <div class="summary-fill" style="width:{{ s.attendance_pct }}%"></div>
+                </div>
+                <div class="summary-stats">
+                    <span>{{ s.present_days }}/{{ s.total_working_days }} days</span>
+                    <span style="color:var(--accent3);">{{ s.attendance_pct }}%</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+</body>
+</html>

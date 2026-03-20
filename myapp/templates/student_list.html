@@ -1,368 +1,182 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Students</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students — {{ batch.batch_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;
+            --border:#2a2a3d;--accent:#6c63ff;--accent2:#ff6584;
+            --accent3:#43e97b;--accent4:#f7971e;--text:#e8e8f0;--muted:#6b6b8a;--card:#15151f;
         }
-        
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            background: white;
-            padding: 25px 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            display:flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        
-        .header h2 {
-            color: #2d3748;
-            font-size: 28px;
-            font-weight: 600;
-        }
-        
-        .logout {
-            background: linear-gradient(135deg, #e97c7c 0%, #db0505 100%);
-            color: white;
-            padding: 12px 28px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(243, 185, 181, 0.3);
-        }
-        
-        .logout:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-            background: linear-gradient(135deg, #f70202 0%, #ff0303 100%);
-        }
-        
-        .content-card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-        
-        h3 {
-            color: #2d3748;
-            font-size: 24px;
-            margin-bottom: 25px;
-            font-weight: 600;
-        }
-        
-        .table-container {
-            overflow-x: auto;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-        
-        thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        th {
-            color: white;
-            padding: 18px 15px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        th:first-child {
-            border-radius: 10px 0 0 0;
-        }
-        
-        th:last-child {
-            border-radius: 0 10px 0 0;
-        }
-        
-        tbody tr {
-            background: white;
-            transition: all 0.3s ease;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        tbody tr:hover {
-            background: #f7fafc;
-            transform: scale(1.01);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        
-        tbody tr:last-child {
-            border-bottom: none;
-        }
-        
-        td {
-            padding: 20px 15px;
-            color: #4a5568;
-            font-size: 15px;
-        }
-        
-        select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #4a5568;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a5568' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 35px;
-        }
-        
-        select:hover {
-            border-color: #667eea;
-        }
-        
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        button.update-btn {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 14px;
-            transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
-            margin-right: 8px;
-        }
-        
-        button.update-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
-        }
-        
-        a.button {
-            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 14px;
-            transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
-            display: inline-block;
-        }
-        
-        a.button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
-        }
-        
-        .action-cell {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #718096;
-            font-size: 16px;
-        }
-        
-        .student-name {
-            font-weight: 600;
-            color: #2d3748;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px;}
 
-        .container{
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
+        .container{max-width:1400px;margin:0 auto;}
 
-        .markAttendance{
-            background: linear-gradient(135deg, #ed64a6 0%, #d53f8c 100%);
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(237, 100, 166, 0.3);
-            float: right;
-            margin-top: -50px;
-        }
-        .markAttendance:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(237, 100, 166, 0.4);
-            background: linear-gradient(135deg, #d53f8c 0%, #b83280 100%);
-        }
+        /* Top bar */
+        .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+        .top-bar-left h1{font-size:22px;font-weight:700;}
+        .top-bar-left .sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:4px;text-transform:uppercase;letter-spacing:2px;}
 
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.95);
-            color: #667eea;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.6s ease;
+        .btn{padding:9px 20px;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.2s;border:none;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
+        .btn-primary{background:var(--accent);color:white;}
+        .btn-primary:hover{background:#5a52e0;transform:translateY(-1px);}
+        .btn-pink{background:rgba(255,101,132,0.15);color:var(--accent2);border:1px solid rgba(255,101,132,0.3);}
+        .btn-pink:hover{background:rgba(255,101,132,0.25);}
+        .btn-logout{background:rgba(255,101,132,0.1);color:var(--accent2);border:1px solid rgba(255,101,132,0.3);}
+        .btn-logout:hover{background:rgba(255,101,132,0.2);}
+        .btn-green{background:rgba(67,233,123,0.15);color:var(--accent3);border:1px solid rgba(67,233,123,0.3);}
+        .btn-green:hover{background:rgba(67,233,123,0.25);}
+        .btn-blue{background:rgba(74,144,226,0.15);color:#74b9ff;border:1px solid rgba(74,144,226,0.3);}
+        .btn-blue:hover{background:rgba(74,144,226,0.25);}
+
+        /* Attendance badge */
+        .att-badge {
+            background:var(--card);border:1px solid var(--border);border-radius:10px;
+            padding:12px 18px;font-size:13px;display:inline-flex;align-items:center;gap:10px;
         }
-        .back-button:hover {
-            transform: translateX(-5px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        .att-badge .dot{width:8px;height:8px;border-radius:50%;}
+        .dot-green{background:var(--accent3);}
+        .dot-red{background:var(--accent2);}
+
+        /* Info bar */
+        .info-bar{
+            background:var(--card);border:1px solid var(--border);border-radius:14px;
+            padding:20px 24px;margin-bottom:24px;
+            display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
         }
-        
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .table-container {
-                overflow-x: scroll;
-            }
-            
-            table {
-                min-width: 800px;
-            }
+        .info-bar .batch-title{font-size:18px;font-weight:700;}
+        .info-bar .batch-time{font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+        .top-actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+        /* Table */
+        .table-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+        .table-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+        .table-title{font-size:15px;font-weight:600;}
+        table{width:100%;border-collapse:collapse;}
+        th{text-align:left;padding:12px 18px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);background:var(--bg2);font-weight:600;border-bottom:1px solid var(--border);}
+        td{padding:14px 18px;font-size:13px;border-bottom:1px solid rgba(42,42,61,0.5);}
+        tr:last-child td{border-bottom:none;}
+        tr:hover td{background:rgba(108,99,255,0.04);}
+
+        select{
+            background:var(--bg3);border:1px solid var(--border);color:var(--text);
+            padding:8px 10px;border-radius:7px;font-size:13px;font-family:'Space Grotesk',sans-serif;
+            outline:none;transition:border-color 0.2s;width:100%;
+        }
+        select:focus{border-color:var(--accent);}
+        select option{background:var(--bg2);}
+
+        .tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;}
+        .tag-purple{background:rgba(108,99,255,0.15);color:#a29bfe;}
+        .tag-green{background:rgba(67,233,123,0.15);color:#43e97b;}
+        .tag-blue{background:rgba(74,144,226,0.15);color:#74b9ff;}
+
+        .action-cell{display:flex;gap:8px;align-items:center;}
+
+        .empty-state{text-align:center;padding:50px;color:var(--muted);font-size:14px;}
+        .empty-icon{font-size:40px;margin-bottom:12px;opacity:0.5;}
+
+        @media(max-width:768px){
+            .info-bar{flex-direction:column;align-items:flex-start;}
+            .top-actions{width:100%;}
+            table{min-width:700px;}
+            .table-card{overflow-x:auto;}
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-        <div class = "header-left">
-            <h2>Welcome, {{ request.user.staff.staff_name }}</h2>
-            
-                <div class = "attendance",style="background:#f0f0f0; padding:10px; margin-bottom:20px; border:1px solid #ccc;">
-                    <strong>Today's Attendance ({{ attendance.date }}):</strong>
-                    {% if attendance %}
-                        ✅ Present ({{ attendance.time|time:"H:i" }}) 
-                        {% if attendance.wifi_verified %}
-                            <span style="color:green;">(WiFi Verified)</span>
-                        {% else %}
-                            <span style="color:orange;">(Not Verified)</span>
-                        {% endif %}
-                    {% else %}
-                        ❌ Not Marked Yet
-                    {% endif %}
-                </div>
-            </div>
-            <div class="header-right">
-                <h3>{{ batch.batch_name }} ({{ batch.start_time }} - {{ batch.end_time }})</h3>
-                <a class = "back-button" href="/get_batches" class="back-button">
-                    ⬅ Back to Batches
-                </a>
-            </div>
+<div class="container">
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <div class="sub">Staff Portal</div>
+            <h1>👋 {{ request.user.staff.staff_name }}</h1>
         </div>
-
-        <div class="content-card">
-            <h3>Your Students</h3>
-            <a class ="markAttendance" href="{% url 'student_attendance' batch.batch_id %}">Mark Attendance</a>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Student Name</th>
-                            <th>Course</th>
-                            <th>Batch</th>
-                            <th>Mode</th>
-                            <th style="text-align: center;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for student in students %}
-                        <tr>
-                            <td class="student-name">{{ student.student_name }}</td>
-                            <td>{{ student.course.course_name }}</td>
-                            
-                            <form method="post" style="display: contents;">
-                                {% csrf_token %}
-                                <td>
-                                    <form method="POST">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="student_id" value="{{ student.student_id }}">
-                                        <select name="batch">
-                                            {% for b in batches %}
-                                                <option value="{{ b.batch_id }}" {% if b == student.batch %}selected{% endif %}>
-                                                    {{ b.batch_name }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                </td>
-                                <td>
-                                    <select name="mode">
-                                        <option value="True" {% if student.mode %}selected{% endif %}>Online</option>
-                                        <option value="False" {% if not student.mode %}selected{% endif %}>Offline</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <div class="action-cell">
-                                        <input type="hidden" name="student_id" value="{{ student.student_id }}">
-                                        <button type="submit" class="update-btn">Update</button>
-                                        <a class="button" href="{% url 'student_detail' student.student_id batch.batch_id%}">View / Add Progress</a>
-                                    </div>
-                                </td>
-                            </form>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="empty-state">No students assigned to you.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <div class="att-badge">
+                {% if attendance %}
+                <div class="dot dot-green"></div>
+                <span>Present — {{ attendance.time|time:"H:i" }}</span>
+                {% if attendance.wifi_verified %}<span style="color:var(--accent3);font-size:11px;">📶 WiFi</span>{% else %}<span style="color:var(--accent4);font-size:11px;">Login only</span>{% endif %}
+                {% else %}
+                <div class="dot dot-red"></div>
+                <span style="color:var(--muted);">Not marked yet</span>
+                {% endif %}
             </div>
+            <a href="{% url 'get_batches' %}" class="btn btn-primary">← Batches</a>
         </div>
     </div>
+
+    <div class="info-bar">
+        <div>
+            <div class="batch-title">{{ batch.batch_name }}</div>
+            <div class="batch-time">{{ batch.start_time }} — {{ batch.end_time }}</div>
+        </div>
+        <div class="top-actions">
+            <a href="{% url 'student_attendance' batch.batch_id %}" class="btn btn-pink">📅 Mark Attendance</a>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div class="table-header">
+            <div class="table-title">Your Students</div>
+            <span style="font-size:12px;color:var(--muted);">{{ students|length }} student{{ students|length|pluralize }}</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Batch</th>
+                    <th>Mode</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td><strong>{{ student.student_name }}</strong></td>
+                    <td><span class="tag tag-purple">{{ student.course.course_name }}</span></td>
+                    <form method="POST" style="display:contents;">
+                        {% csrf_token %}
+                        <input type="hidden" name="student_id" value="{{ student.student_id }}">
+                        <td>
+                            <select name="batch">
+                                {% for b in batches %}
+                                <option value="{{ b.batch_id }}" {% if b == student.batch %}selected{% endif %}>{{ b.batch_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <select name="mode">
+                                <option value="True" {% if student.mode %}selected{% endif %}>Offline</option>
+                                <option value="False" {% if not student.mode %}selected{% endif %}>Online</option>
+                            </select>
+                        </td>
+                        <td>
+                            <div class="action-cell">
+                                <button type="submit" class="btn btn-green" style="font-size:12px;padding:7px 14px;">Update</button>
+                                <a class="btn btn-blue" style="font-size:12px;padding:7px 14px;" href="{% url 'student_detail' student.student_id batch.batch_id %}">View Progress</a>
+                            </div>
+                        </td>
+                    </form>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <div class="empty-icon">👥</div>
+                            No students assigned to this batch yet.
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 </body>
 </html>

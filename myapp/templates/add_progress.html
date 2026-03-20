@@ -3,486 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Progress - {{ student.student_name }}</title>
+    <title>Edit Progress — {{ student.student_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;
+            --border:#2a2a3d;--accent:#6c63ff;--accent2:#ff6584;
+            --accent3:#43e97b;--text:#e8e8f0;--muted:#6b6b8a;--card:#15151f;
         }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px;}
+        .container{max-width:1400px;margin:0 auto;}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            position: relative;
+        .back-btn{
+            display:inline-flex;align-items:center;gap:8px;
+            background:var(--card);border:1px solid var(--border);color:var(--muted);
+            padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;
+            text-decoration:none;transition:all 0.2s;margin-bottom:24px;
         }
+        .back-btn:hover{border-color:var(--accent);color:var(--text);}
 
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: moveBackground 20s linear infinite;
-            pointer-events: none;
+        .header-card{
+            background:var(--card);border:1px solid var(--border);border-radius:16px;
+            padding:24px 28px;margin-bottom:24px;
         }
+        .header-card h2{font-size:22px;font-weight:700;letter-spacing:-0.3px;}
+        .header-card h2 span{color:var(--accent);}
 
-        @keyframes moveBackground {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
+        .form-card{
+            background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;
         }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
+        .table-wrap{overflow-x:auto;}
+        table{width:100%;border-collapse:collapse;}
+        th{
+            text-align:left;padding:13px 18px;
+            font-size:11px;text-transform:uppercase;letter-spacing:1.5px;
+            color:var(--muted);background:var(--bg2);font-weight:600;border-bottom:1px solid var(--border);
         }
+        td{padding:12px 18px;font-size:13px;border-bottom:1px solid rgba(42,42,61,0.5);vertical-align:middle;}
+        tr:last-child td{border-bottom:none;}
+        tbody tr{transition:background 0.15s;animation:rowIn 0.4s ease forwards;opacity:0;}
+        tbody tr:nth-child(1){animation-delay:0.04s}
+        tbody tr:nth-child(2){animation-delay:0.08s}
+        tbody tr:nth-child(3){animation-delay:0.12s}
+        tbody tr:nth-child(4){animation-delay:0.16s}
+        tbody tr:nth-child(5){animation-delay:0.20s}
+        tbody tr:nth-child(n+6){animation-delay:0.24s}
+        @keyframes rowIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+        tr:hover td{background:rgba(108,99,255,0.04);}
 
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.95);
-            color: #667eea;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.6s ease;
+        .module-cell{font-weight:700;color:var(--accent);font-size:12px;font-family:'JetBrains Mono',monospace;}
+        .topic-cell{font-weight:500;}
+
+        input[type="date"],input[type="number"]{
+            background:var(--bg3);border:1px solid var(--border);color:var(--text);
+            padding:9px 11px;border-radius:8px;font-size:13px;
+            font-family:'Space Grotesk',sans-serif;outline:none;
+            transition:border-color 0.2s,box-shadow 0.2s;width:100%;min-width:130px;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        input[type="date"]:focus,input[type="number"]:focus{
+            border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,0.15);
         }
+        input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);}
+        input[type="number"]{max-width:90px;}
+        input[type="hidden"]{display:none;}
 
-        .back-button:hover {
-            transform: translateX(-5px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        .changed{border-color:var(--accent3) !important;}
+
+        .form-footer{padding:24px;border-top:1px solid var(--border);display:flex;justify-content:center;}
+        .save-btn{
+            background:var(--accent3);color:#0a0a0f;border:none;
+            padding:13px 48px;border-radius:10px;font-size:15px;font-weight:700;
+            cursor:pointer;font-family:'Space Grotesk',sans-serif;
+            transition:all 0.2s;position:relative;overflow:hidden;
         }
-
-        .header-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-            animation: fadeInDown 0.6s ease 0.1s both;
+        .save-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(67,233,123,0.3);}
+        .save-btn.saving{pointer-events:none;opacity:0.7;}
+        .save-btn.saving::after{
+            content:'';position:absolute;width:18px;height:18px;
+            top:50%;left:50%;margin:-9px 0 0 -9px;
+            border:2px solid rgba(0,0,0,0.3);border-top-color:#0a0a0f;
+            border-radius:50%;animation:spin 0.6s linear infinite;
         }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        h2 {
-            color: #333;
-            font-size: 2em;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        h2::before {
-            content: '📝';
-            font-size: 0.8em;
-        }
-
-        .form-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            animation: fadeInUp 0.6s ease 0.2s both;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .table-container {
-            overflow-x: auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 25px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: center;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85em;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        tbody tr {
-            transition: all 0.3s ease;
-            animation: slideIn 0.4s ease forwards;
-            opacity: 0;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        tbody tr:nth-child(1) { animation-delay: 0.1s; }
-        tbody tr:nth-child(2) { animation-delay: 0.15s; }
-        tbody tr:nth-child(3) { animation-delay: 0.2s; }
-        tbody tr:nth-child(4) { animation-delay: 0.25s; }
-        tbody tr:nth-child(5) { animation-delay: 0.3s; }
-        tbody tr:nth-child(n+6) { animation-delay: 0.35s; }
-
-        tbody tr:hover {
-            background: #f8f9ff;
-            transform: scale(1.01);
-        }
-
-        input[type="date"],
-        input[type="number"],
-        input[type="text"] {
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 0.95em;
-            transition: all 0.3s ease;
-            background: white;
-            width: 100%;
-            min-width: 120px;
-        }
-
-        input[type="date"]:focus,
-        input[type="number"]:focus,
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: scale(1.02);
-        }
-
-        input[type="number"] {
-            max-width: 100px;
-        }
-
-        input[type="hidden"] {
-            display: none;
-        }
-
-        button[type="submit"] {
-            width: 100%;
-            max-width: 300px;
-            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
-            display: block;
-            margin: 0 auto;
-        }
-
-        button[type="submit"]::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s ease;
-        }
-
-        button[type="submit"]:hover::before {
-            left: 100%;
-        }
-
-        button[type="submit"]:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
-        }
-
-        button[type="submit"]:active {
-            transform: translateY(0);
-        }
-
-        button[type="submit"].saving {
-            pointer-events: none;
-            opacity: 0.7;
-        }
-
-        button[type="submit"].saving::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            top: 50%;
-            left: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .module-cell {
-            font-weight: 600;
-            color: #667eea;
-        }
-
-        .topic-cell {
-            text-align: left;
-            font-weight: 500;
-        }
-
-        .input-hint {
-            font-size: 0.75em;
-            color: #999;
-            margin-top: 5px;
-            display: block;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 15px;
-            }
-
-            .header-card, .form-card {
-                padding: 20px;
-            }
-
-            h2 {
-                font-size: 1.5em;
-            }
-
-            table {
-                font-size: 0.85em;
-            }
-
-            th, td {
-                padding: 10px 5px;
-            }
-
-            input[type="date"],
-            input[type="number"],
-            input[type="text"] {
-                font-size: 0.85em;
-                padding: 8px;
-                min-width: 90px;
-            }
-
-            button[type="submit"] {
-                font-size: 1em;
-                padding: 12px 20px;
-            }
-        }
-
-        /* Progress indicator */
-        .save-success {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4CAF50;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-            z-index: 1000;
-            animation: slideInRight 0.5s ease;
-        }
-
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
+        @keyframes spin{to{transform:rotate(360deg)}}
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="{% url 'student_detail' student.student_id batch_id %}" class="back-button">
-            ⬅ Back to Student
-        </a>
+<div class="container">
+    <a href="{% url 'student_detail' student.student_id batch_id %}" class="back-btn">← Back to Student</a>
 
-        <div class="header-card">
-            <h2>Add / Update Progress for {{ student.student_name }}</h2>
-        </div>
-
-        <div class="form-card">
-            <form method="POST" id="progressForm">
-                {% csrf_token %}
-                {{ formset.management_form }}
-
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Module</th>
-                                <th>Topic</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Marks</th>
-                                <!-- <th>Sign</th> -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for form, topic in topic_form_pairs %}
-                            {{ form.id }}
-                            <tr>
-                                <td class="module-cell">{{ topic.module_name }}</td>
-                                <td class="topic-cell">{{ topic.topic_name }}</td>
-                                <td>{{ form.start_date }}</td>
-                                <td>{{ form.end_date }}</td>
-                                <td>{{ form.marks }}</td>
-                                <!-- <td>{{ form.sign }}</td> -->
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <button type="submit" id="saveBtn">💾 Save Progress</button>
-            </form>
-        </div>
+    <div class="header-card">
+        <h2>📝 Progress for <span>{{ student.student_name }}</span></h2>
     </div>
 
-    <script>
-        // Add smooth scrolling for table
-        const tableContainer = document.querySelector('.table-container');
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-
-        tableContainer.addEventListener('mousedown', (e) => {
-            isDown = true;
-            startX = e.pageX - tableContainer.offsetLeft;
-            scrollLeft = tableContainer.scrollLeft;
+    <div class="form-card">
+        <form method="POST" id="progressForm">
+            {% csrf_token %}
+            {{ formset.management_form }}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Module</th><th>Topic</th>
+                            <th>Start Date</th><th>End Date</th><th>Marks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for form, topic in topic_form_pairs %}
+                        {{ form.id }}
+                        <tr>
+                            <td class="module-cell">{{ topic.module_name }}</td>
+                            <td class="topic-cell">{{ topic.topic_name }}</td>
+                            <td>{{ form.start_date }}</td>
+                            <td>{{ form.end_date }}</td>
+                            <td>{{ form.marks }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-footer">
+                <button type="submit" class="save-btn" id="saveBtn">💾 Save Progress</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    document.getElementById('progressForm').addEventListener('submit', function() {
+        document.getElementById('saveBtn').classList.add('saving');
+    });
+    // Highlight changed inputs
+    document.querySelectorAll('input[type="date"],input[type="number"]').forEach(input => {
+        const orig = input.value;
+        input.addEventListener('change', function() {
+            this.classList.toggle('changed', this.value !== orig);
         });
-
-        tableContainer.addEventListener('mouseleave', () => {
-            isDown = false;
+    });
+    // Clamp marks 0–100
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value > 100) this.value = 100;
+            if (this.value < 0)   this.value = 0;
         });
-
-        tableContainer.addEventListener('mouseup', () => {
-            isDown = false;
-        });
-
-        tableContainer.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - tableContainer.offsetLeft;
-            const walk = (x - startX) * 2;
-            tableContainer.scrollLeft = scrollLeft - walk;
-        });
-
-        // Handle form submission
-        const form = document.getElementById('progressForm');
-        const saveBtn = document.getElementById('saveBtn');
-        
-        form.addEventListener('submit', function() {
-            saveBtn.classList.add('saving');
-            saveBtn.textContent = '';
-        });
-
-        // Auto-highlight changed inputs
-        const inputs = document.querySelectorAll('input[type="date"], input[type="number"], input[type="text"]');
-        inputs.forEach(input => {
-            const originalValue = input.value;
-            
-            input.addEventListener('change', function() {
-                if (this.value !== originalValue) {
-                    this.style.borderColor = '#4CAF50';
-                    this.style.background = '#f1f8f4';
-                }
-            });
-
-            // Add focus animation
-            input.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'scale(1.05)';
-            });
-
-            input.addEventListener('blur', function() {
-                this.parentElement.style.transform = 'scale(1)';
-            });
-        });
-
-        // Validate marks input (0-100)
-        const marksInputs = document.querySelectorAll('input[type="number"]');
-        marksInputs.forEach(input => {
-            input.addEventListener('input', function() {
-                if (this.value > 100) {
-                    this.value = 100;
-                } else if (this.value < 0) {
-                    this.value = 0;
-                }
-            });
-        });
-    </script>
+    });
+</script>
 </body>
 </html>

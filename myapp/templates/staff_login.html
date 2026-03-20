@@ -3,280 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Login</title>
+    <title>Staff Login — TESDB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #0a0a0f; --bg2: #12121a; --bg3: #1a1a26;
+            --border: #2a2a3d; --accent: #6c63ff; --accent2: #ff6584;
+            --accent3: #43e97b; --text: #e8e8f0; --muted: #6b6b8a; --card: #15151f;
         }
-
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            position: relative;
-            overflow: hidden;
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex;
+            align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
         }
-
         body::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: moveBackground 20s linear infinite;
+            content: ''; position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(108,99,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(108,99,255,0.05) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
         }
-
-        @keyframes moveBackground {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
+        @keyframes gridMove { 0%{transform:translate(0,0)} 100%{transform:translate(60px,60px)} }
+        .orb {
+            position: absolute; border-radius: 50%;
+            filter: blur(80px); opacity: 0.12; animation: float 8s ease-in-out infinite;
         }
+        .orb-1 { width:350px;height:350px;background:var(--accent);top:-80px;left:-80px; }
+        .orb-2 { width:250px;height:250px;background:var(--accent2);bottom:-60px;right:-60px;animation-delay:-4s; }
+        @keyframes float { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,15px)} }
 
-        .login-container {
-            position: relative;
-            z-index: 1;
-            animation: fadeInUp 0.8s ease;
+        .card {
+            position: relative; z-index: 1;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 48px 44px; width: 90%; max-width: 420px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+            animation: fadeUp 0.6s cubic-bezier(.16,1,.3,1) both;
         }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        .logo { font-size:11px; font-weight:600; letter-spacing:4px; text-transform:uppercase; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:24px; }
+        .lock-icon { font-size:40px; margin-bottom:16px; display:block; animation: bounce 2s ease-in-out infinite; }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        h2 { font-size:26px; font-weight:700; letter-spacing:-0.5px; margin-bottom:32px; }
+        h2 span { background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
-        form {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 50px 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            width: 100%;
-            max-width: 420px;
-        }
-
-        h2 {
-            color: #333;
-            font-size: 2em;
-            margin-bottom: 30px;
-            text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 25px;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.2em;
-            color: #667eea;
-            transition: all 0.3s ease;
-        }
-
+        .input-group { position:relative; margin-bottom:18px; }
+        .input-icon { position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted);transition:color 0.2s; }
         input {
-            display: block;
-            width: 100%;
-            padding: 15px 15px 15px 50px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s ease;
-            background: white;
-            color: #333;
+            width:100%; background:var(--bg3); border:1px solid var(--border);
+            color:var(--text); padding:12px 14px 12px 42px; border-radius:10px;
+            font-size:14px; font-family:'Space Grotesk',sans-serif;
+            outline:none; transition:border-color 0.2s,box-shadow 0.2s;
         }
+        input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(108,99,255,0.15); }
+        input:focus ~ .input-icon { color:var(--accent); }
+        input::placeholder { color:var(--muted); }
 
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-            transform: translateY(-2px);
+        .submit-btn {
+            width:100%; background:var(--accent); color:white; border:none;
+            padding:13px; border-radius:10px; font-size:15px; font-weight:600;
+            cursor:pointer; font-family:'Space Grotesk',sans-serif;
+            transition:all 0.2s; margin-top:8px; position:relative; overflow:hidden;
         }
+        .submit-btn:hover { background:#5a52e0; transform:translateY(-1px); box-shadow:0 8px 20px rgba(108,99,255,0.35); }
+        .submit-btn.loading { pointer-events:none; opacity:0.7; }
+        .submit-btn.loading::after {
+            content:''; position:absolute; width:18px;height:18px;
+            top:50%;left:50%;margin:-9px 0 0 -9px;
+            border:2px solid rgba(255,255,255,0.3);border-top-color:white;
+            border-radius:50%; animation:spin 0.6s linear infinite;
+        }
+        @keyframes spin { to{transform:rotate(360deg)} }
 
-        input:focus + .input-icon {
-            color: #764ba2;
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        input::placeholder {
-            color: #999;
-        }
-
-        button {
-            width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s ease;
-        }
-
-        button:hover::before {
-            left: 100%;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
+        .footer-link { text-align:center; margin-top:20px; font-size:13px; color:var(--muted); }
+        .footer-link a { color:var(--accent); text-decoration:none; font-weight:600; }
+        .footer-link a:hover { color:#a29bfe; }
 
         .message {
-            background: #fee;
-            color: #c33;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border-left: 4px solid #c33;
-            animation: shake 0.5s ease, fadeIn 0.3s ease;
-            font-size: 0.95em;
+            background:rgba(255,101,132,0.1); border:1px solid rgba(255,101,132,0.3);
+            color:var(--accent2); padding:11px 14px; border-radius:8px;
+            margin-top:14px; font-size:13px;
+            animation:shake 0.4s ease;
         }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .lock-icon {
-            text-align: center;
-            font-size: 3em;
-            margin-bottom: 20px;
-            animation: bounce 1s ease infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @media (max-width: 480px) {
-            form {
-                padding: 40px 25px;
-                margin: 20px;
-            }
-
-            h2 {
-                font-size: 1.6em;
-            }
-        }
-
-        /* Loading state */
-        button.loading {
-            pointer-events: none;
-            opacity: 0.7;
-        }
-
-        button.loading::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            top: 50%;
-            left: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
     </style>
 </head>
 <body>
-    <div class="login-container">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="card">
+        <div class="logo">TESDB</div>
+        <span class="lock-icon">🔐</span>
+        <h2><span>Staff</span> Login</h2>
         <form method="POST" id="loginForm">
             {% csrf_token %}
-            <div class="lock-icon">🔐</div>
-            <h2>Staff Login</h2>
-            
             <div class="input-group">
-                <input type="text" name="username" placeholder="Username" required id="username">
+                <input type="text" name="username" placeholder="Username" required>
                 <span class="input-icon">👤</span>
             </div>
-            
             <div class="input-group">
-                <input type="password" name="password" placeholder="Password" required id="password">
+                <input type="password" name="password" placeholder="Password" required>
                 <span class="input-icon">🔒</span>
             </div>
-            
-            <button type="submit" id="loginBtn">Login</button>
-            <p>if u don't have account <a href="{% url 'register_staff' %}"> register here</a></p>
-            {% for message in messages %}
-             
-            <p class="message">{{ message }}</p>
-            {% endfor %}
+            <button type="submit" class="submit-btn" id="loginBtn">Login</button>
         </form>
+        <div class="footer-link">Don't have an account? <a href="{% url 'register_staff' %}">Register here</a></div>
+        {% for message in messages %}
+        <div class="message">{{ message }}</div>
+        {% endfor %}
     </div>
-
     <script>
-        const form = document.getElementById('loginForm');
-        const btn = document.getElementById('loginBtn');
-        
-        form.addEventListener('submit', function() {
-            btn.classList.add('loading');
-            btn.textContent = '';
-        });
-
-        // Add floating label effect
-        const inputs = document.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('focused');
-            });
-            
-            input.addEventListener('blur', function() {
-                if (this.value === '') {
-                    this.parentElement.classList.remove('focused');
-                }
-            });
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            document.getElementById('loginBtn').classList.add('loading');
         });
     </script>
 </body>

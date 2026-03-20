@@ -162,3 +162,57 @@ class Batch(models.Model):
         if self.start_time and self.end_time:
             if self.start_time >= self.end_time:
                 raise ValidationError("End Time must be later than Start Time.")
+            
+
+
+class StaffCourseProgress(models.Model):
+    """Tracks which course topics a staff member has self-studied and marked complete."""
+    id = models.AutoField(primary_key=True)
+    staff = models.ForeignKey("Staff", on_delete=models.CASCADE, related_name="course_progress")
+    topic = models.ForeignKey("CourseTopic", on_delete=models.CASCADE, related_name="staff_progress")
+    completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('staff', 'topic')
+
+    def __str__(self):
+        status = "✓" if self.completed else "○"
+        return f"{status} {self.staff.staff_name} — {self.topic.topic_name}"
+    
+
+# ── ADD THESE TO THE BOTTOM of your existing models.py ───────────────────────
+# (Keep all existing models above, just paste these at the end)
+
+class StaffLeave(models.Model):
+    """
+    Paid-leave balance per staff.
+    - Unlocked after 3 calendar months from join_date.
+    - 1 day credited every month after unlock.
+    - Credit is applied lazily when the staff attendance page is visited.
+    """
+    staff         = models.OneToOneField("Staff", on_delete=models.CASCADE, related_name="leave")
+    join_date     = models.DateField(help_text="Date this staff member started")
+    leave_balance = models.DecimalField(max_digits=6, decimal_places=1, default=0)
+    leave_used    = models.DecimalField(max_digits=6, decimal_places=1, default=0)
+    last_credited = models.DateField(null=True, blank=True,
+                                     help_text="Last month-start on which 1 day was credited")
+
+    def __str__(self):
+        return f"{self.staff.staff_name} — balance: {self.leave_balance}d used: {self.leave_used}d"
+
+
+class StaffLeaveUsage(models.Model):
+    """One row per leave day taken by a staff member."""
+    LEAVE_TYPES = [("paid", "Paid Leave"), ("absent", "Absent (Unpaid)")]
+    staff      = models.ForeignKey("Staff", on_delete=models.CASCADE, related_name="leaves_taken")
+    date       = models.DateField()
+    leave_type = models.CharField(max_length=10, choices=LEAVE_TYPES, default="absent")
+    note       = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        unique_together = ("staff", "date")
+        ordering = ["-date"]
+
+    def __str__(self):
+        return f"{self.staff.staff_name} — {self.date} ({self.leave_type})"

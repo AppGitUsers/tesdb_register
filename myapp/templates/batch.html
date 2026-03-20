@@ -2,566 +2,487 @@
 <html lang="en">
 <head>
     <title>Batch Processing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #0a0a0f;
+            --bg2: #12121a;
+            --bg3: #1a1a26;
+            --border: #2a2a3d;
+            --accent: #6c63ff;
+            --accent2: #ff6584;
+            --accent3: #43e97b;
+            --accent4: #f7971e;
+            --text: #e8e8f0;
+            --muted: #6b6b8a;
+            --card: #15151f;
         }
-        
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px;
         }
-        
-        .messages {
-            max-width: 1200px;
-            margin: 0 auto 20px auto;
-        }
-        
+
+        .messages-wrap { max-width: 1200px; margin: 0 auto 20px; }
         .alert {
-            padding: 16px 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 500;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            animation: slideIn 0.3s ease-out;
+            padding: 14px 18px; border-radius: 10px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 10px; font-size: 14px;
+            animation: slideDown 0.3s ease;
         }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .alert-success {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            color: white;
-        }
-        
-        .alert-error {
-            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
-            color: white;
-        }
-        
-        .alert-icon {
-            font-size: 24px;
-        }
-        
-        .alert-close {
-            margin-left: auto;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-        
-        .alert-close:hover {
-            opacity: 1;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
+        @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+        .alert-success { background: rgba(67,233,123,0.12); border: 1px solid rgba(67,233,123,0.3); color: var(--accent3); }
+        .alert-error { background: rgba(255,101,132,0.12); border: 1px solid rgba(255,101,132,0.3); color: var(--accent2); }
+        .alert-close { margin-left:auto; cursor:pointer; opacity:0.7; font-size:18px; }
+        .alert-close:hover { opacity:1; }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
         .top-bar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 28px;
         }
-        
-        .logout {
-            background: linear-gradient(135deg, #e97c7c 0%, #db0505 100%);
-            color: white;
-            padding: 12px 28px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(243, 185, 181, 0.3);
+        .top-bar-left { display:flex; align-items:center; gap:12px; }
+
+        .btn {
+            padding: 10px 22px; border-radius: 9px; font-family: 'Space Grotesk',sans-serif;
+            font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s;
+            border: none; text-decoration: none; display: inline-flex; align-items:center; gap:7px;
         }
-        
-        .logout:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-            background: linear-gradient(135deg, #f70202 0%, #ff0303 100%);
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: #5a52e0; transform: translateY(-1px); }
+        .btn-success { background: rgba(67,233,123,0.15); color: var(--accent3); border: 1px solid rgba(67,233,123,0.3); }
+        .btn-success:hover { background: rgba(67,233,123,0.25); transform: translateY(-1px); }
+        .btn-learn { background: linear-gradient(135deg, #f7971e, #ffd200); color: #1a1a26; }
+        .btn-learn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(247,151,30,0.3); }
+        .btn-danger { background: rgba(255,101,132,0.15); color: var(--accent2); border: 1px solid rgba(255,101,132,0.3); }
+        .btn-danger:hover { background: rgba(255,101,132,0.25); }
+        .btn-logout { background: rgba(255,101,132,0.1); color: var(--accent2); border: 1px solid rgba(255,101,132,0.3); }
+        .btn-logout:hover { background: rgba(255,101,132,0.2); }
+
+        .header-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 28px 32px; margin-bottom: 28px;
         }
-        
-        .header {
-            background: white;
-            padding: 35px 40px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .header-card .greeting { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+        .header-card h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+        .header-card h1 span { color: var(--accent); }
+        .header-actions-row { display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; }
+
+        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 18px; }
+
+        .batch-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 14px; overflow: hidden;
+            transition: all 0.25s; position: relative;
         }
-        
-        .header h2 {
-            color: #667eea;
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 5px;
+        .batch-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 12px 30px rgba(108,99,255,0.15); }
+        .batch-card-glow {
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
         }
-        
-        .header h1 {
-            color: #2d3748;
-            font-size: 32px;
-            font-weight: 600;
-            margin-bottom: 20px;
+        .batch-body {
+            padding: 24px; cursor: pointer;
         }
-        
-        .add-batch-link {
-            text-decoration: none;
-            align-self: flex-start;
-        }
-        
-        .buttons {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            color: white;
-            padding: 14px 32px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
-        }
-        
-        .buttons:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
-        }
-        
-        .batchContainer {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-            padding: 10px;
-        }
-        
-        .batch-card-wrapper {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .batch-card-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.3s;
-            z-index: 0;
-        }
-        
-        .batch-card-wrapper:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .batch-card-wrapper:hover::before {
-            width: 100%;
-            opacity: 0.1;
-        }
-        
-        .batch-content {
-            padding: 30px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            cursor: pointer;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .batch-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: #2d3748;
-            display: block;
-        }
-        
+        .batch-name { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
         .batch-time {
-            font-size: 15px;
-            color: #718096;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px;
+            font-family: 'JetBrains Mono', monospace;
         }
-        
-        .batch-time::before {
-            content: '🕐';
-            font-size: 18px;
+        .batch-meta { margin-top: 14px; display:flex; gap:8px; }
+        .tag {
+            display: inline-block; padding: 3px 10px; border-radius: 6px;
+            font-size: 11px; font-weight: 600;
         }
-        
-        .batch-card-buttons {
-            padding: 0 30px 25px 30px;
-            display: flex;
-            gap: 12px;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 20px;
-            position: relative;
-            z-index: 1;
+        .tag-purple { background: rgba(108,99,255,0.15); color: #a29bfe; }
+        .tag-green { background: rgba(67,233,123,0.15); color: #43e97b; }
+        .tag-orange { background: rgba(247,151,30,0.15); color: #f7971e; }
+        .batch-footer {
+            padding: 14px 24px; border-top: 1px solid var(--border);
+            display: flex; gap: 10px;
         }
-        
-        .edit-btn {
-            flex: 1;
-            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.2s;
-            box-shadow: 0 2px 10px rgba(66, 153, 225, 0.3);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        
-        .edit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4);
-            background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
-        }
-        
-        .delete-btn {
-            flex: 1;
-            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.2s;
-            box-shadow: 0 2px 10px rgba(252, 129, 129, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        
-        .delete-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(252, 129, 129, 0.4);
-            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-        }
-        
+        .batch-footer .btn { flex:1; justify-content:center; font-size:12px; padding:8px 12px; }
+
         .empty-state {
-            background: white;
-            padding: 60px 40px;
-            border-radius: 15px;
-            text-align: center;
-            color: #718096;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            grid-column: 1 / -1;
+            text-align: center; padding: 60px 40px;
+            background: var(--card); border: 1px dashed var(--border); border-radius: 16px;
+            grid-column: 1/-1;
         }
-        
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        
-        .empty-state-text {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #4a5568;
-        }
-        
-        /* Modal Styles */
+        .empty-state-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state-text { font-size: 16px; color: var(--muted); }
+
+        /* ===== MODAL ===== */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease-out;
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75); z-index: 1000;
+            justify-content: center; align-items: center;
         }
-        
-        .modal-overlay.active {
-            display: flex;
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+            padding: 32px; width: 92%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+            animation: popIn 0.25s ease;
         }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+        @keyframes popIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+        .modal h3 { font-size: 20px; font-weight: 700; margin-bottom: 22px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display:block; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:7px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width:100%; background:var(--bg3); border:1px solid var(--border);
+            color:var(--text); padding:10px 14px; border-radius:8px;
+            font-size:14px; font-family:'Space Grotesk',sans-serif; outline:none; transition:border-color 0.2s;
         }
-        
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            max-width: 450px;
-            width: 90%;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.3s ease-out;
-            position: relative;
+        .form-group input:focus, .form-group select:focus { border-color:var(--accent); }
+        .form-group select option { background:var(--bg2); }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .modal-actions { display:flex; gap:12px; margin-top:8px; }
+        .btn-full { flex:1; justify-content:center; padding:12px; font-size:14px; }
+        .modal-secondary { background:var(--bg3); color:var(--muted); border:1px solid var(--border); }
+
+        /* Course learning modal */
+        .course-list { display:grid; gap:12px; }
+        .course-option {
+            background:var(--bg3); border:1px solid var(--border); border-radius:10px;
+            padding:16px 18px; cursor:pointer; transition:all 0.2s;
+            display:flex; justify-content:space-between; align-items:center;
         }
-        
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        .course-option:hover { border-color:var(--accent); background:rgba(108,99,255,0.06); }
+        .course-option .course-opt-name { font-weight:600; font-size:15px; }
+        .course-option .course-opt-meta { font-size:12px; color:var(--muted); margin-top:3px; }
+        .course-opt-progress { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent3); }
+
+        /* Topic Progress Tracker */
+        .topic-section-header {
+            font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:2px;
+            padding:12px 0 8px; margin-top:8px; border-top:1px solid var(--border);
         }
-        
-        .modal-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 25px;
-            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
+        .topic-item {
+            display:flex; align-items:center; gap:12px; padding:10px 0;
+            border-bottom:1px solid rgba(42,42,61,0.5);
         }
-        
-        .modal-title {
-            font-size: 26px;
-            font-weight: 700;
-            color: #2d3748;
-            text-align: center;
-            margin-bottom: 15px;
+        .topic-item:last-child { border-bottom:none; }
+        .topic-checkbox {
+            width:18px; height:18px; border-radius:4px; border:2px solid var(--border);
+            cursor:pointer; display:flex; align-items:center; justify-content:center;
+            transition:all 0.2s; flex-shrink:0;
         }
-        
-        .modal-message {
-            font-size: 16px;
-            color: #718096;
-            text-align: center;
-            margin-bottom: 30px;
-            line-height: 1.6;
+        .topic-checkbox.done { background:var(--accent3); border-color:var(--accent3); }
+        .topic-checkbox.done::after { content:'✓'; color:var(--bg); font-size:11px; font-weight:700; }
+        .topic-name-text { flex:1; font-size:14px; }
+        .topic-name-text.done { text-decoration:line-through; color:var(--muted); }
+        .topic-module-label { font-size:11px; color:var(--accent); font-family:'JetBrains Mono',monospace; }
+
+        .progress-summary {
+            background:var(--bg3); border-radius:10px; padding:14px 16px; margin-bottom:16px;
+            display:flex; align-items:center; gap:16px;
         }
-        
-        .modal-batch-name {
-            font-weight: 600;
-            color: #667eea;
-        }
-        
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .modal-btn {
-            flex: 1;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .modal-btn-cancel {
-            background: #e2e8f0;
-            color: #4a5568;
-        }
-        
-        .modal-btn-cancel:hover {
-            background: #cbd5e0;
-            transform: translateY(-2px);
-        }
-        
-        .modal-btn-delete {
-            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(252, 129, 129, 0.3);
-        }
-        
-        .modal-btn-delete:hover {
-            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(252, 129, 129, 0.4);
-        }
-        
-        @media (max-width: 768px) {
-            .batchContainer {
-                grid-template-columns: 1fr;
-            }
-            
-            .header {
-                padding: 25px;
-            }
-            
-            .header h1 {
-                font-size: 26px;
-            }
-            
-            .batch-card-buttons {
-                flex-direction: column;
-            }
+        .progress-ring-wrap { flex-shrink:0; }
+        .progress-text { flex:1; }
+        .progress-text .done-count { font-size:22px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+        .progress-text .done-label { font-size:12px; color:var(--muted); }
+        .progress-bar-outer { height:6px; background:var(--border); border-radius:3px; margin-top:8px; }
+        .progress-bar-inner { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--accent),var(--accent3)); transition:width 0.5s; }
+
+        @media(max-width:640px){
+            .header-actions-row { flex-direction:column; }
+            .form-row { grid-template-columns:1fr; }
+            .batch-footer { flex-direction:column; }
         }
     </style>
 </head>
 <body>
-    <!-- Messages Display -->
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                <span class="alert-icon">
-                    {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}⚠{% endif %}
-                </span>
-                <span>{{ message }}</span>
-                <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+
+{% if messages %}
+<div class="messages-wrap">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        <span>{% if message.tags == 'success' %}✓{% else %}⚠{% endif %}</span>
+        <span>{{ message }}</span>
+        <span class="alert-close" onclick="this.parentElement.remove()">✕</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="container">
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <div>
+                <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;">Staff Portal</div>
+                <div style="font-size:20px;font-weight:700;">👋 {{ request.user.staff.staff_name }}</div>
             </div>
+        </div>
+        <a href="{% url 'staff_logout' %}" class="btn btn-logout">↩ Logout</a>
+    </div>
+
+    <div class="header-card">
+        <div class="greeting">Your Dashboard</div>
+        <h1>Select a <span>Batch</span> to manage</h1>
+        <div class="header-actions-row">
+            <a href="/add_batch/" class="btn btn-primary">＋ Add Batch</a>
+            <button class="btn btn-learn" onclick="openCourseModal()">🎓 Study a Course</button>
+            <button class="btn btn-success" onclick="openModal('modal-add-student')">＋ Add Student</button>
+            <a href="{% url 'staff_own_attendance' %}" class="btn btn-learn">📅 My Attendance</a>
+        </div>
+    </div>
+
+    <div class="batch-grid">
+        {% for batch in batches %}
+        <div class="batch-card">
+            <div class="batch-card-glow"></div>
+            <div class="batch-body" onclick="window.location.href='{% url 'student_list' batch.batch_id %}'">
+                <div class="batch-name">{{ batch.batch_name }}</div>
+                <div class="batch-time">🕐 {{ batch.start_time|time:"h:i A" }} — {{ batch.end_time|time:"h:i A" }}</div>
+                <div class="batch-meta">
+                    <span class="tag tag-purple">{{ batch.students.count }} student{{ batch.students.count|pluralize }}</span>
+                </div>
+            </div>
+            <div class="batch-footer">
+                <a href="{% url 'edit_batch' batch.batch_id %}" class="btn btn-primary">✏️ Edit</a>
+                <button class="btn btn-danger" onclick="openDeleteModal('{{ batch.batch_id }}','{{ batch.batch_name }}')">🗑 Delete</button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📚</div>
+            <div class="empty-state-text">No batches yet. Create your first batch!</div>
+        </div>
         {% endfor %}
     </div>
-    {% endif %}
+</div>
 
-    <div class="container">
-        <div class="top-bar">
-            <a href="{% url 'staff_logout' %}" class="logout">Logout</a>
-        </div>
-        
-        <div class="header">
-            <h2>Welcome, {{ request.user.staff.staff_name }}</h2>
-            <h1>Select a Batch</h1>
-            <a href="/add_batch/" class="add-batch-link">
-                <button class="buttons">+ Add Batch</button>
-            </a>
-        </div>
-
-        <div class="batchContainer">
-            {% for batch in batches %}
-                <div class="batch-card-wrapper">
-                    <div class="batch-content" onclick="window.location.href='{% url 'student_list' batch.batch_id %}'">
-                        <span class="batch-name">{{batch.batch_name}}</span>
-                        <span class="batch-time">{{batch.start_time}} - {{batch.end_time}}</span>
-                    </div>
-                    
-                    <div class="batch-card-buttons">
-                        <a href="{% url 'edit_batch' batch.batch_id %}" class="edit-btn">
-                            <span>✏️</span>
-                            <span>Edit</span>
-                        </a>
-                        
-                        <button type="button" class="delete-btn" onclick="openDeleteModal('{{batch.batch_id}}', '{{batch.batch_name}}')">
-                            <span>🗑️</span>
-                            <span>Delete</span>
-                        </button>
-                    </div>
-                </div>
-            {% empty %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">📚</div>
-                    <div class="empty-state-text">No batches available</div>
-                </div>
-            {% endfor %}
-        </div>
+<!-- ===== DELETE MODAL ===== -->
+<div id="modal-delete" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-delete')">
+    <div class="modal" style="max-width:420px;text-align:center;" onclick="event.stopPropagation()">
+        <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+        <h3 style="justify-content:center;">Delete Batch?</h3>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:24px;line-height:1.6;">
+            Are you sure you want to delete <strong id="delete-batch-name" style="color:var(--accent2)"></strong>?<br>This cannot be undone.
+        </p>
+        <form id="delete-form" method="POST">
+            {% csrf_token %}
+            <div class="modal-actions">
+                <button type="button" class="btn modal-secondary btn-full" onclick="closeModal('modal-delete')">Cancel</button>
+                <button type="submit" class="btn btn-danger btn-full">Delete</button>
+            </div>
+        </form>
     </div>
-    
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal-overlay" onclick="closeDeleteModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-icon">⚠️</div>
-            <h2 class="modal-title">Delete Batch?</h2>
-            <p class="modal-message">
-                Are you sure you want to delete <span class="modal-batch-name" id="modalBatchName"></span>? 
-                This action cannot be undone.
-            </p>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-                <form id="deleteForm" method="POST" style="flex: 1;">
-                    {% csrf_token %}
-                    <button type="submit" class="modal-btn modal-btn-delete" style="width: 100%;">Delete Batch</button>
-                </form>
+</div>
+
+<!-- ===== ADD STUDENT MODAL ===== -->
+<div id="modal-add-student" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-add-student')">
+<div class="modal" onclick="event.stopPropagation()">
+    <h3>👤 Add New Student</h3>
+    <form method="POST" action="{% url 'staff_add_student' %}">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group"><label>Full Name</label><input name="student_name" required placeholder="Student name"></div>
+            <div class="form-group"><label>Email</label><input name="student_email" type="email" required placeholder="email@domain.com"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Contact</label><input name="student_contact" placeholder="Mobile number"></div>
+            <div class="form-group"><label>Join Date</label><input name="join_date" type="date" required value="{{ today }}"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Batch</label>
+                <select name="batch" required>
+                    <option value="">Select batch</option>
+                    {% for b in batches %}<option value="{{ b.batch_id }}">{{ b.batch_name }} ({{ b.start_time|time:"h:i A" }})</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Mode</label>
+                <select name="mode">
+                    <option value="True">Offline</option>
+                    <option value="False">Online</option>
+                </select>
             </div>
         </div>
-    </div>
+        <div class="form-group">
+            <label>Course</label>
+            <select name="course" required>
+                <option value="">Select course</option>
+                {% for c in staff_courses %}<option value="{{ c.course_id }}">{{ c.course_name }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn modal-secondary btn-full" onclick="closeModal('modal-add-student')">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-full">Add Student</button>
+        </div>
+    </form>
+</div>
+</div>
+
+<!-- ===== COURSE LEARNING MODAL ===== -->
+<div id="modal-courses" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-courses')">
+<div class="modal" onclick="event.stopPropagation()" style="max-width:600px;">
+    <h3>🎓 Study a Course</h3>
     
-    <script>
-        let currentBatchId = null;
-        let currentBatchName = null;
-        
-        function openDeleteModal(batchId, batchName) {
-            currentBatchId = batchId;
-            currentBatchName = batchName;
-            
-            // Update modal content
-            document.getElementById('modalBatchName').textContent = batchName;
-            
-            // Update form action - matches your Django URL pattern
-            const form = document.getElementById('deleteForm');
-            form.action = '{% url "delete_batch" 0 %}'.replace('0', batchId);
-            
-            // Show modal
-            document.getElementById('deleteModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeDeleteModal(event) {
-            if (!event || event.target.id === 'deleteModal') {
-                document.getElementById('deleteModal').classList.remove('active');
-                document.body.style.overflow = 'auto';
-            }
-        }
-        
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeDeleteModal();
-            }
+    <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Pick a course to study at your own pace. Track topics as you complete them.</p>
+    <div class="course-list" id="course-list-container">
+        {% for c in all_courses_for_learning %}
+        <div class="course-option" onclick="loadCourseTopics('{{ c.course_id }}', '{{ c.course_name }}')">
+            <div>
+                <div class="course-opt-name">{{ c.course_name }}</div>
+                <div class="course-opt-meta">{{ c.topics.count }} topics</div>
+            </div>
+            <div>
+                <div class="course-opt-progress" id="course-pct-{{ c.course_id }}">
+                    {{ c.completed_count }}/{{ c.topics.count }}
+                </div>
+                <div style="font-size:11px;color:var(--muted);text-align:right;">done</div>
+            </div>
+        </div>
+        {% empty %}
+        <div style="color:var(--muted);text-align:center;padding:30px;">No courses available</div>
+        {% endfor %}
+    </div>
+</div>
+</div>
+
+<!-- ===== TOPIC PROGRESS MODAL ===== -->
+<div id="modal-topics" class="modal-overlay" onclick="if(event.target===this){ closeModal('modal-topics'); openCourseModal(); }">
+<div class="modal" onclick="event.stopPropagation()" style="max-width:600px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+        <button onclick="closeModal('modal-topics'); openCourseModal();" style="background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:7px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:13px;">← Back</button>
+        <h3 style="margin-bottom:0;" id="topic-modal-title">Topics</h3>
+    </div>
+
+    <div class="progress-summary" id="progress-summary">
+        <div class="progress-text">
+            <div><span class="done-count" id="done-count">0</span> <span style="color:var(--muted);font-size:14px;">/ <span id="total-count">0</span> topics completed</span></div>
+            <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-fill" style="width:0%"></div></div>
+        </div>
+    </div>
+
+    <div id="topics-list"></div>
+</div>
+</div>
+
+<script>
+// ===== UTILITY =====
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function openDeleteModal(id, name) {
+    document.getElementById('delete-batch-name').textContent = name;
+    document.getElementById('delete-form').action = '{% url "delete_batch" 0 %}'.replace('/0/', `/${id}/`);
+    openModal('modal-delete');
+}
+
+function openCourseModal() {
+    closeModal('modal-topics');
+    openModal('modal-courses');
+}
+
+// ===== COURSE TOPIC LEARNING =====
+let currentCourseId = null;
+
+function loadCourseTopics(courseId, courseName) {
+    currentCourseId = courseId;
+    closeModal('modal-courses');
+    openModal('modal-topics');
+    document.getElementById('topic-modal-title').textContent = '📘 ' + courseName;
+    document.getElementById('topics-list').innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">Loading topics...</div>';
+
+    fetch(`/staff/course-topics/${courseId}/`)
+        .then(r => r.json())
+        .then(data => renderTopics(data))
+        .catch(() => {
+            document.getElementById('topics-list').innerHTML = '<div style="color:var(--accent2);padding:20px;">Error loading topics.</div>';
         });
-        
-        // Auto-hide messages after 5 seconds
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.style.transition = 'opacity 0.5s, transform 0.5s';
-                alert.style.opacity = '0';
-                alert.style.transform = 'translateY(-20px)';
-                setTimeout(() => alert.remove(), 500);
-            });
-        }, 5000);
-    </script>
+}
+
+function renderTopics(data) {
+    const container = document.getElementById('topics-list');
+    const total = data.topics.length;
+    let done = data.topics.filter(t => t.completed).length;
+
+    updateProgressUI(done, total);
+
+    if (total === 0) {
+        container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:30px;">No topics in this course yet.</div>';
+        return;
+    }
+
+    // Group by module
+    const modules = {};
+    data.topics.forEach(t => {
+        if (!modules[t.module_name]) modules[t.module_name] = [];
+        modules[t.module_name].push(t);
+    });
+
+    let html = '';
+    Object.entries(modules).forEach(([mod, topics]) => {
+        html += `<div class="topic-section-header">${mod}</div>`;
+        topics.forEach(t => {
+            html += `
+            <div class="topic-item" id="topic-item-${t.topic_id}">
+                <div class="topic-checkbox ${t.completed ? 'done' : ''}" onclick="toggleTopic(${t.topic_id}, this)" id="chk-${t.topic_id}"></div>
+                <div class="topic-name-text ${t.completed ? 'done' : ''}" id="lbl-${t.topic_id}">${t.topic_name}</div>
+                ${t.completed ? '<span style="font-size:11px;color:var(--muted);font-family:JetBrains Mono,monospace;">✓ done</span>' : ''}
+            </div>`;
+        });
+    });
+    container.innerHTML = html;
+}
+
+function updateProgressUI(done, total) {
+    document.getElementById('done-count').textContent = done;
+    document.getElementById('total-count').textContent = total;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    document.getElementById('progress-bar-fill').style.width = pct + '%';
+}
+
+function toggleTopic(topicId, el) {
+    const isDone = el.classList.contains('done');
+    const newStatus = !isDone;
+
+    fetch(`/staff/toggle-topic/${topicId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ completed: newStatus })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            el.classList.toggle('done', newStatus);
+            const lbl = document.getElementById(`lbl-${topicId}`);
+            lbl.classList.toggle('done', newStatus);
+
+            // Update badge in course list
+            if (data.done_count !== undefined && data.total !== undefined) {
+                const badge = document.getElementById(`course-pct-${currentCourseId}`);
+                if (badge) badge.textContent = `${data.done_count}/${data.total}`;
+                updateProgressUI(data.done_count, data.total);
+            }
+        }
+    });
+}
+
+function getCookie(name) {
+    let v = null;
+    document.cookie.split(';').forEach(c => {
+        const [k, val] = c.trim().split('=');
+        if (k === name) v = decodeURIComponent(val);
+    });
+    return v;
+}
+
+// Auto-dismiss alerts
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(a => {
+        a.style.transition = 'opacity 0.5s';
+        a.style.opacity = '0';
+        setTimeout(() => a.remove(), 500);
+    });
+}, 5000);
+</script>
 </body>
 </html>

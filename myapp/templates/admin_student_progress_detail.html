@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ student.student_name }} — Progress (Admin)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;--border:#2a2a3d;--accent:#6c63ff;--accent2:#ff6584;--accent3:#43e97b;--accent4:#f7971e;--text:#e8e8f0;--muted:#6b6b8a;--card:#15151f;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px;}
+        .container{max-width:1100px;margin:0 auto;}
+
+        /* Breadcrumb nav */
+        .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
+        .breadcrumb a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;transition:color 0.2s;}
+        .breadcrumb a:hover{color:var(--accent);}
+        .breadcrumb .sep{color:var(--border);font-size:16px;}
+        .breadcrumb .current{color:var(--text);font-size:13px;font-weight:600;}
+
+        /* Header card */
+        .header-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px 32px;margin-bottom:24px;}
+        .header-top{display:flex;align-items:center;gap:18px;margin-bottom:22px;flex-wrap:wrap;}
+        .s-avatar{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:white;flex-shrink:0;}
+        .s-name-big{font-size:22px;font-weight:700;letter-spacing:-0.3px;}
+        .s-name-big span{color:var(--accent);}
+        .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px;}
+        .chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;}
+        .chip-purple{background:rgba(108,99,255,0.15);color:#a29bfe;}
+        .chip-green{background:rgba(67,233,123,0.15);color:#43e97b;}
+        .chip-blue{background:rgba(74,144,226,0.15);color:#74b9ff;}
+        .chip-orange{background:rgba(247,151,30,0.15);color:#f7971e;}
+
+        /* Overall progress */
+        .overall{background:var(--bg3);border-radius:12px;padding:18px 22px;}
+        .overall-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+        .overall-label{font-size:14px;font-weight:600;}
+        .overall-pct{font-size:30px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+        .pct-high{color:var(--accent3);}
+        .pct-mid{color:var(--accent4);}
+        .pct-low{color:var(--accent2);}
+        .prog-bar-big{height:10px;background:var(--border);border-radius:5px;overflow:hidden;}
+        .prog-fill-big{height:100%;border-radius:5px;transition:width 1s ease;}
+        .fill-high{background:linear-gradient(90deg,var(--accent),var(--accent3));}
+        .fill-mid{background:linear-gradient(90deg,var(--accent),var(--accent4));}
+        .fill-low{background:linear-gradient(90deg,var(--accent2),var(--accent4));}
+        .prog-meta{display:flex;gap:20px;margin-top:8px;font-size:12px;color:var(--muted);}
+
+        /* Admin quick actions */
+        .admin-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+        .action-btn{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'Space Grotesk',sans-serif;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+        .action-edit{background:var(--accent);color:white;}
+        .action-edit:hover{background:#5a52e0;transform:translateY(-1px);}
+        .action-att{background:rgba(67,233,123,0.15);color:var(--accent3);border:1px solid rgba(67,233,123,0.3);}
+        .action-att:hover{background:rgba(67,233,123,0.25);}
+
+        /* Module sections */
+        .modules{margin-top:24px;}
+        .module-block{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+
+        .module-header{
+            padding:15px 22px;background:var(--bg2);border-bottom:1px solid var(--border);
+            display:flex;justify-content:space-between;align-items:center;
+            cursor:pointer;transition:background 0.15s;user-select:none;
+        }
+        .module-header:hover{background:var(--bg3);}
+        .module-name{font-size:13px;font-weight:700;color:var(--accent);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1.2px;}
+
+        .module-right{display:flex;align-items:center;gap:12px;}
+        .module-stat{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+        .mod-mini-bar{width:70px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+        .mod-mini-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent3));}
+        .mod-arrow{font-size:11px;color:var(--muted);transition:transform 0.2s;}
+        .mod-arrow.open{transform:rotate(180deg);}
+
+        /* Topics table */
+        .topics-table{width:100%;border-collapse:collapse;}
+        .topics-table th{
+            text-align:left;padding:11px 18px;
+            font-size:10px;text-transform:uppercase;letter-spacing:1.5px;
+            color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);
+        }
+        .topics-table td{padding:13px 18px;font-size:13px;border-bottom:1px solid rgba(42,42,61,0.4);vertical-align:middle;}
+        .topics-table tr:last-child td{border-bottom:none;}
+        .topics-table tbody tr:hover td{background:rgba(108,99,255,0.04);}
+
+        .status-row{display:flex;align-items:center;gap:8px;}
+        .sdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+        .sdot-done{background:var(--accent3);}
+        .sdot-prog{background:var(--accent4);}
+        .sdot-pend{background:var(--border);}
+
+        .date-val{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);}
+        .empty-val{color:var(--border);font-style:italic;font-size:12px;}
+
+        .marks-badge{display:inline-block;padding:2px 9px;border-radius:5px;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+        .marks-ex{background:rgba(67,233,123,0.15);color:#43e97b;}
+        .marks-gd{background:rgba(74,144,226,0.15);color:#74b9ff;}
+        .marks-av{background:rgba(247,151,30,0.15);color:#f7971e;}
+        .marks-pw{background:rgba(255,101,132,0.15);color:#ff6584;}
+
+        .edit-link{background:rgba(108,99,255,0.1);color:#a29bfe;border:1px solid rgba(108,99,255,0.2);border-radius:6px;padding:4px 11px;font-size:11px;font-weight:600;text-decoration:none;transition:all 0.2s;}
+        .edit-link:hover{background:rgba(108,99,255,0.2);}
+
+        @media(max-width:640px){
+            .header-top{flex-direction:column;align-items:flex-start;}
+            .topics-table{font-size:12px;}
+            .topics-table td,.topics-table th{padding:10px 12px;}
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="{% url 'admin_dashboard' %}">⬛ Admin Dashboard</a>
+        <span class="sep">›</span>
+        <a href="{% url 'admin_students_overview' %}{% if back_params %}?{{ back_params }}{% endif %}">👥 Students Overview</a>
+        <span class="sep">›</span>
+        <span class="current">{{ student.student_name }}</span>
+    </div>
+
+    <!-- Student header -->
+    <div class="header-card">
+        <div class="header-top">
+            <div class="s-avatar">{{ student.student_name|slice:":1"|upper }}</div>
+            <div style="flex:1;">
+                <div class="s-name-big">{{ student.student_name }} <span>— {{ student.course.course_name }}</span></div>
+                <div class="chips">
+                    <span class="chip chip-purple">📧 {{ student.student_email }}</span>
+                    {% if student.student_contact %}<span class="chip chip-blue">📱 {{ student.student_contact }}</span>{% endif %}
+                    <span class="chip chip-orange">🧑‍🏫 {{ student.staff.staff_name|default:"Unassigned" }}</span>
+                    {% if student.batch %}<span class="chip chip-orange">🕐 {{ student.batch.batch_name }}</span>{% endif %}
+                    <span class="chip {% if student.mode %}chip-green{% else %}chip-blue{% endif %}">{% if student.mode %}📍 Offline{% else %}💻 Online{% endif %}</span>
+                    <span class="chip chip-purple">📅 Joined {{ student.join_date }}</span>
+                    {% if student.end_date %}<span class="chip chip-blue">🏁 Ends {{ student.end_date }}</span>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall progress bar -->
+        <div class="overall">
+            <div class="overall-row">
+                <span class="overall-label">Overall Course Completion</span>
+                <span class="overall-pct {% if pct >= 75 %}pct-high{% elif pct >= 40 %}pct-mid{% else %}pct-low{% endif %}">{{ pct }}%</span>
+            </div>
+            <div class="prog-bar-big">
+                <div class="prog-fill-big {% if pct >= 75 %}fill-high{% elif pct >= 40 %}fill-mid{% else %}fill-low{% endif %}" style="width:{{ pct }}%"></div>
+            </div>
+            <div class="prog-meta">
+                <span>✓ {{ completed }} topics completed</span>
+                <span>📚 {{ total }} total topics</span>
+                <span>○ {{ total }} — {{ completed }} remaining</span>
+            </div>
+        </div>
+
+        <!-- Admin actions -->
+        <div class="admin-actions">
+            {% if batch_id %}
+            <a href="/admin/myapp/student/{{ student.student_id }}/change/" class="action-btn action-edit">✏️ Edit Student</a>
+            <a href="{% url 'add_progress' student.student_id batch_id %}" class="action-btn action-att">📝 Edit Progress</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Module breakdown -->
+    <div class="modules">
+        {% for module_name, topics in modules.items %}
+        {% with mod_done=0 mod_total=topics|length %}
+        <div class="module-block">
+            <div class="module-header" onclick="toggleModule(this)">
+                <span class="module-name">{{ module_name }}</span>
+                <div class="module-right">
+                    <span class="module-stat">{{ mod_total }} topics</span>
+                    <div class="mod-mini-bar">
+                        <div class="mod-mini-fill" style="width:{% widthratio topics|length topics|length 100 %}%"></div>
+                    </div>
+                    <span class="mod-arrow open">▲</span>
+                </div>
+            </div>
+            <div class="module-body">
+                <table class="topics-table">
+                    <thead>
+                        <tr>
+                            <th>Topic</th>
+                            <th>Status</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Marks</th>
+                            <th>Signed By</th>
+                            <th>Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in topics %}
+                        <tr>
+                            <td>
+                                <div class="status-row">
+                                    <div class="sdot {% if item.done %}sdot-done{% elif item.progress and item.progress.start_date %}sdot-prog{% else %}sdot-pend{% endif %}"></div>
+                                    <span>{{ item.topic.topic_name }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                {% if item.done %}
+                                    <span style="color:var(--accent3);font-size:12px;font-weight:600;">✓ Completed</span>
+                                {% elif item.progress and item.progress.start_date %}
+                                    <span style="color:var(--accent4);font-size:12px;font-weight:600;">⏳ In Progress</span>
+                                {% else %}
+                                    <span style="color:var(--muted);font-size:12px;">○ Not started</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.progress and item.progress.start_date %}
+                                <span class="date-val">{{ item.progress.start_date }}</span>
+                                {% else %}<span class="empty-val">—</span>{% endif %}
+                            </td>
+                            <td>
+                                {% if item.progress and item.progress.end_date %}
+                                <span class="date-val">{{ item.progress.end_date }}</span>
+                                {% else %}<span class="empty-val">—</span>{% endif %}
+                            </td>
+                            <td>
+                                {% if item.progress and item.progress.marks %}
+                                <span class="marks-badge {% if item.progress.marks >= 90 %}marks-ex{% elif item.progress.marks >= 75 %}marks-gd{% elif item.progress.marks >= 60 %}marks-av{% else %}marks-pw{% endif %}">
+                                    {{ item.progress.marks }}
+                                </span>
+                                {% else %}<span class="empty-val">—</span>{% endif %}
+                            </td>
+                            <td class="date-val">{{ item.progress.sign|default:"—" }}</td>
+                            <td>
+                                {% if batch_id %}
+                                <a href="{% url 'add_progress' student.student_id batch_id %}" class="edit-link">✏️ Edit</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endwith %}
+        {% empty %}
+        <div style="text-align:center;padding:40px;color:var(--muted);">No topics found for this course.</div>
+        {% endfor %}
+    </div>
+
+</div>
+<script>
+function toggleModule(header) {
+    const body  = header.nextElementSibling;
+    const arrow = header.querySelector('.mod-arrow');
+    const open  = arrow.classList.contains('open');
+    body.style.display = open ? 'none' : '';
+    arrow.classList.toggle('open', !open);
+}
+</script>
+</body>
+</html>
