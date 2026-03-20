@@ -13,10 +13,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import dj_database_url
 import os
-
+from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv(dotenv_path=BASE_DIR / ".env",override=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-+vd^wj3dy^an0$+yjt&&)zncsr-a5$%z91jn_xjaktdw@2wdw$
 DEBUG = False
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
-
+print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATIC_URL = '/static/'
@@ -157,16 +157,17 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
-EMAIL_USE_TLS = False
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER =   os.environ.get("EMAIL_HOST_USER")                        #'vishvasen912@gmail.com'   # admin email
-# EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")# # app-specific password, not Gmail password
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+#EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+#SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+#DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+#EMAIL_USE_TLS = False
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER =   os.environ.get("EMAIL_HOST_USER")                        #'vishvasen912@gmail.com'   # admin email
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD") # app-specific password, not Gmail password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 # Redirect users after login

@@ -166,9 +166,18 @@ class StaffByCourseFilter(admin.SimpleListFilter):
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     form = StudentAdminForm
-    list_display = ('student_id', 'student_name', 'join_date', 'course', 'staff')
+    list_display = ('student_id', 'student_name', 'join_date', 'course', 'staff','start_time','end_time')
     list_filter = (CourseWithStaffFilter,)
     search_fields = ('student_name',)
+
+    @admin.display(description="Start Time")
+    def start_time(self, obj):
+        return obj.batch.start_time if obj.batch else "-"
+
+
+    @admin.display(description="End Time")
+    def end_time(self, obj):
+        return obj.batch.end_time if obj.batch else "-"
 
     class Media:
         js = ("myapp/student_admin_v2.js",)
