@@ -377,8 +377,8 @@ def admin_dashboard(request):
         'all_topics':             CourseTopic.objects.select_related('course').all(),
         'all_progress':           StudentTopicProgress.objects.select_related('student', 'topic', 'topic__course').all()[:200],
         'all_batches':            Batch.objects.select_related('staff').all(),
-        'all_student_attendance': StudentAttendance.objects.select_related('student', 'student__course', 'student__staff').order_by('-date')[:100],
-        'all_staff_attendance':   Attendance.objects.select_related('staff').order_by('-date')[:50],
+        'all_student_attendance': StudentAttendance.objects.select_related('student', 'student__course', 'student__staff').filter(date=today).order_by('-date')[:100],
+        'all_staff_attendance':   Attendance.objects.select_related('staff').filter(date=today).order_by('-date')[:50],
         'today':                  str(today),
     })
 
