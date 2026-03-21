@@ -20,7 +20,7 @@ import logging
 import json
 import calendar
 from dateutil.relativedelta import relativedelta
-
+from django.views.decorators.http import require_POST
 logger = logging.getLogger(__name__)
 
 
@@ -859,4 +859,18 @@ def admin_student_progress_detail(request, student_id):
         'pct':         pct,
         'batch_id':    student.batch_id if student.batch else None,
         'back_params': request.GET.urlencode(),
+    })
+
+@staff_member_required
+@require_POST
+def toggle_wifi(request, attendance_id):
+    att = get_object_or_404(Attendance, id=attendance_id)
+    
+    # Toggle value
+    att.wifi_verified = not att.wifi_verified
+    att.save()
+
+    return JsonResponse({
+        "status": "ok",
+        "wifi_verified": att.wifi_verified
     })

@@ -59,6 +59,9 @@ urlpatterns = [
          views.admin_student_progress_detail,
          name='admin_student_progress_detail'),
 
+     #Attendance Toggle
+     path('toggle-wifi/<int:attendance_id>/', views.toggle_wifi, name='toggle_wifi'),
+
     # Home — must be last
     path('', views.home, name='home'),
 ]
