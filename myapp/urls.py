@@ -7,7 +7,8 @@ urlpatterns = [
     path('logout/',         views.staff_logout,   name='staff_logout'),
     path('register_staff/', views.register_staff, name='register_staff'),
     #bio
-    re_path(r'^(?i)iclock/.*(\.aspx)?$', views.iclock_data, name='iclock_data'),
+    re_path(r'^iclock/.*(\.aspx)?$', views.iclock_data),
+    #re_path(r'^(?i)iclock/.*(\.aspx)?$', views.iclock_data, name='iclock_data'),
    # path("iclock/cdata.aspx/", views.iclock_data, name="iclock_data"),
 #     path("iclock/cdata/", views.iclock_data),
 #     path("iclock/attlog/", views.iclock_data),
