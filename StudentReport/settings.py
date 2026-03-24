@@ -25,7 +25,7 @@ load_dotenv(dotenv_path=BASE_DIR / ".env",override=True)
 SECRET_KEY = 'django-insecure-+vd^wj3dy^an0$+yjt&&)zncsr-a5$%z91jn_xjaktdw@2wdw$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
