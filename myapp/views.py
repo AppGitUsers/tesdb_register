@@ -921,7 +921,9 @@ def admin_student_progress_detail(request, student_id):
 # views.py
 @csrf_exempt
 def iclock_data(request):
-    print("biometric testing for bermuda")
+    print(f"{request.method} request received at {request.path} from {request.META.get('REMOTE_ADDR')}")
+    print("IN ICLOCK")
+    print("IN ICLOCK")
     # Device sends GET first to handshake — must return "OK"
     if request.method == "GET":
         return HttpResponse("OK")

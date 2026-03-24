@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
@@ -7,7 +7,8 @@ urlpatterns = [
     path('logout/',         views.staff_logout,   name='staff_logout'),
     path('register_staff/', views.register_staff, name='register_staff'),
     #bio
-    path("iclock/cdata.aspx/", views.iclock_data, name="iclock_data"),
+    re_path(r'^iclock/(.*)\.aspx$', views.iclock_data, name='iclock_data'),
+   # path("iclock/cdata.aspx/", views.iclock_data, name="iclock_data"),
 #     path("iclock/cdata/", views.iclock_data),
 #     path("iclock/attlog/", views.iclock_data),
 #     path(r'^.*$', views.iclock_data),
