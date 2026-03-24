@@ -19,7 +19,8 @@ class Staff(models.Model):
     staff_id = models.AutoField(primary_key=True)
     staff_email = models.EmailField(unique=True)
     courses = models.ManyToManyField("Course", related_name="staffs")
-
+        
+    #bio
     def __str__(self):
         return self.staff_name
 
@@ -117,14 +118,29 @@ class StudentTopicProgress(models.Model):
 class Attendance(models.Model):
     staff = models.ForeignKey("Staff", on_delete=models.CASCADE, related_name="attendances")
     date = models.DateField(default=timezone.now)
-    time = models.TimeField(auto_now_add=True)
-    wifi_verified = models.BooleanField(default=False)  # was it from correct WiFi?
+    time = models.TimeField(null=True,blank=True)
+#bio     #wifi_verified = models.BooleanField(default=False)  # was it from correct WiFi?
+    source = models.CharField(
+        max_length=20,
+        choices=[
+            ("biometric", "Biometric"),
+            ("manual", "Manual Entry"),
+            ("admin", "Admin Entry"),
+        ],
+        default="biometric"
+    )
 
+    device_sn = models.CharField(max_length=50, null=True, blank=True)
+    verify_code = models.CharField(max_length=10, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+#bio
     class Meta:
-        unique_together = ('staff', 'date','wifi_verified')  # only one attendance per staff per day
+#bio
+        unique_together = ('staff', 'date')  # only one attendance per staff per day
 
     def __str__(self):
-        return f"{self.staff.staff_name} - {self.date} ({'WiFi OK' if self.wifi_verified else 'Login only'})"
+        return f"{self.staff.staff_name} - {self.date} "
 
 class StudentAttendance(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendances')

@@ -244,8 +244,8 @@ class CourseTopicAdmin(admin.ModelAdmin):
 # ----------------------------
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
-    list_display = ("staff", "date", "time", "wifi_verified")
-    list_filter = ("staff", "date", "wifi_verified")
+    list_display = ("staff", "date", "time", "source","device_sn")
+    list_filter = ("staff", "date", "source")
     search_fields = ("staff__staff_name",)
 
 

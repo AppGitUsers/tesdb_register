@@ -21,6 +21,10 @@ import json
 import calendar
 from dateutil.relativedelta import relativedelta
 from django.views.decorators.http import require_POST
+#bio
+import urllib.parse
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 logger = logging.getLogger(__name__)
 
 
@@ -542,7 +546,7 @@ def _build_staff_calendar(staff, year, month):
     # Deduplicate: prefer wifi_verified row if multiple exist per date
     records = {}
     for a in Attendance.objects.filter(staff=staff, date__year=year, date__month=month):
-        if a.date not in records or a.wifi_verified:
+        if a.date not in records :#bio
             records[a.date] = a
 
     weeks = []
@@ -663,7 +667,7 @@ def admin_staff_attendance_calendar(request, staff_id):
             elif action == 'mark_present':
                 # Delete all rows for this date then create one clean row
                 Attendance.objects.filter(staff=staff, date=target).delete()
-                Attendance.objects.create(staff=staff, date=target, wifi_verified=False)
+                Attendance.objects.create(staff=staff, date=target,time=datetime.now().time(),source="admin")#bio
                 StaffLeaveUsage.objects.filter(staff=staff, date=target).delete()
                 messages.success(request, f"Marked present for {target}.")
             elif action == 'mark_absent':
@@ -860,17 +864,107 @@ def admin_student_progress_detail(request, student_id):
         'batch_id':    student.batch_id if student.batch else None,
         'back_params': request.GET.urlencode(),
     })
-
-@staff_member_required
-@require_POST
-def toggle_wifi(request, attendance_id):
-    att = get_object_or_404(Attendance, id=attendance_id)
+# bio
+# @staff_member_required
+# @require_POST
+# def toggle_wifi(request, attendance_id):
+#     att = get_object_or_404(Attendance, id=attendance_id)
     
-    # Toggle value
-    att.wifi_verified = not att.wifi_verified
-    att.save()
+#     # Toggle value
+#     att.wifi_verified = not att.wifi_verified
+#     att.save()
 
-    return JsonResponse({
-        "status": "ok",
-        "wifi_verified": att.wifi_verified
-    })
+#     return JsonResponse({
+#         "status": "ok",
+#         "wifi_verified": att.wifi_verified
+#     })
+    
+    
+#bio
+# @csrf_exempt
+# def iclock_data(request):
+
+#     if request.method == "POST":
+
+#         raw = request.body.decode()
+#         data = urllib.parse.parse_qs(raw)
+
+#         user_id = data.get("UserID", [""])[0]
+#         check_time = data.get("CheckTime", [""])[0]
+#         sn = data.get("SN", [""])[0]
+#         verify_code = data.get("VerifyCode", [""])[0]
+
+#         if not user_id or not check_time:
+#             return HttpResponse("OK")
+
+#         try:
+#             staff = Staff.objects.get(biometric_id=user_id)
+#         except Staff.DoesNotExist:
+#             return HttpResponse("OK")
+
+#         dt = datetime.strptime(check_time, "%Y-%m-%d %H:%M:%S")
+
+#         Attendance.objects.get_or_create(
+#             staff=staff,
+#             date=dt.date(),
+#             source="biometric",
+#             defaults={
+#                 "time": dt.time(),
+#                 "device_sn": sn,
+#                 "verify_code": verify_code
+#             }
+#         )
+
+#         return HttpResponse("OK")
+
+#     return HttpResponse("FAILED")
+# views.py
+@csrf_exempt
+def iclock_data(request):
+    print("biometric testing for bermuda")
+    # Device sends GET first to handshake — must return "OK"
+    if request.method == "GET":
+        return HttpResponse("OK")
+
+    if request.method == "POST":
+        raw  = request.body.decode('utf-8', errors='ignore')
+        data = urllib.parse.parse_qs(raw)
+
+        user_id     = data.get("UserID",     [""])[0].strip()
+        check_time  = data.get("CheckTime",  [""])[0].strip()
+        sn          = data.get("SN",         ["UNKNOWN"])[0].strip()
+        verify_code = data.get("VerifyCode", ["0"])[0].strip()
+
+        if not user_id or not check_time:
+            return HttpResponse("OK")
+
+        try:
+            staff = Staff.objects.get(staff_id=user_id)
+        except Staff.DoesNotExist:
+            logger.warning(f"[Biometric] Unknown UserID: {user_id}")
+            return HttpResponse("OK")  # Always return OK or device will retry forever
+
+        try:
+            dt = datetime.strptime(check_time, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            logger.error(f"[Biometric] Bad timestamp: {check_time}")
+            return HttpResponse("OK")
+
+        obj, created = Attendance.objects.get_or_create(
+            staff=staff,
+            date=dt.date(),
+            source="biometric",
+            defaults={
+                "time":        dt.time(),
+                "device_sn":   sn,
+                "verify_code": verify_code,
+            }
+        )
+
+        logger.info(
+            f"[Biometric] {'NEW' if created else 'DUP'} | "
+            f"Staff: {staff.staff_name} | Time: {dt}"
+        )
+        return HttpResponse("OK")
+
+    return HttpResponse("FAILED")

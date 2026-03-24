@@ -6,10 +6,14 @@ urlpatterns = [
     path('login/',          views.staff_login,    name='staff_login'),
     path('logout/',         views.staff_logout,   name='staff_logout'),
     path('register_staff/', views.register_staff, name='register_staff'),
-
+    #bio
+    path("iclock/cdata.aspx/", views.iclock_data, name="iclock_data"),
+#     path("iclock/cdata/", views.iclock_data),
+#     path("iclock/attlog/", views.iclock_data),
+#     path(r'^.*$', views.iclock_data),
+    
     # Staff — batch dashboard
     path('get_batches/', views.getBatches, name='get_batches'),
-
     # Staff — students
     path('students/<int:batch_id>/',                          views.student_list,   name='student_list'),
     path('student/<int:student_id>/<int:batch_id>',           views.student_detail, name='student_detail'),
@@ -28,7 +32,7 @@ urlpatterns = [
 
     # Staff — course self-learning API
     path('staff/course-topics/<int:course_id>/', views.staff_course_topics, name='staff_course_topics'),
-    path('staff/toggle-topic/<int:topic_id>/',   views.staff_toggle_topic,  name='staff_toggle_topic'),
+    #path('staff/toggle-topic/<int:topic_id>/',   views.staff_toggle_topic,  name='staff_toggle_topic'),
 
     # Staff — own attendance (read-only calendar)
     path('my-attendance/', views.staff_own_attendance, name='staff_own_attendance'),
@@ -60,7 +64,7 @@ urlpatterns = [
          name='admin_student_progress_detail'),
 
      #Attendance Toggle
-     path('toggle-wifi/<int:attendance_id>/', views.toggle_wifi, name='toggle_wifi'),
+    # path('toggle-wifi/<int:attendance_id>/', views.toggle_wifi, name='toggle_wifi'),
 
     # Home — must be last
     path('', views.home, name='home'),

@@ -80,31 +80,31 @@ def mark_attendance(sender, request, user, **kwargs):
 
     today = timezone.now().date()
     ip = get_client_ip(request)
-    wifi_verified = ip in getattr(settings, "ALLOWED_WIFI_IPS", [])
+    # #wifi_verified = ip in getattr(settings, "ALLOWED_WIFI_IPS", [])#bio
 
-    # Case 1: If verified attendance already exists → do nothing
-    if Attendance.objects.filter(staff=staff, date=today, wifi_verified=True).exists():
-        print(f"⚠️ Attendance already marked with WiFi verified for {staff.staff_name} on {today}")
-        return
+    # # Case 1: If verified attendance already exists → do nothing
+    # if Attendance.objects.filter(staff=staff, date=today).exists():
+    #     print(f"⚠️ Attendance already marked with WiFi verified for {staff.staff_name} on {today}")
+    #     return
 
-    # Case 2: If logging in with WiFi verified → create new record
-    if wifi_verified:
-        Attendance.objects.create(staff=staff, date=today, wifi_verified=True)
-        print(f"✅ Attendance (WiFi Verified) marked for {staff.staff_name} on {today} {ip}")
-    else:
-        # Case 3: Allow multiple unverified? → Only one unverified per day
-        if not Attendance.objects.filter(staff=staff, date=today, wifi_verified=False).exists():
-            Attendance.objects.create(staff=staff, date=today, wifi_verified=False)
-            print(f"✅ Attendance (Unverified WiFi) marked for {staff.staff_name} on {today} {ip}")
-        else:
-            print(f"⚠️ Attendance (Unverified) already exists for {staff.staff_name} on {today} {ip}")
+    # # Case 2: If logging in with WiFi verified → create new record
+    # if wifi_verified:
+    #     Attendance.objects.create(staff=staff, date=today, wifi_verified=True)
+    #     print(f"✅ Attendance (WiFi Verified) marked for {staff.staff_name} on {today} {ip}")
+    # else:
+    #     # Case 3: Allow multiple unverified? → Only one unverified per day
+    #     if not Attendance.objects.filter(staff=staff, date=today, wifi_verified=False).exists():
+    #         Attendance.objects.create(staff=staff, date=today, wifi_verified=False)
+    #         print(f"✅ Attendance (Unverified WiFi) marked for {staff.staff_name} on {today} {ip}")
+    #     else:
+    #         print(f"⚠️ Attendance (Unverified) already exists for {staff.staff_name} on {today} {ip}")
             
-    print("DEBUG IP:", repr(ip))
-    print("DEBUG SETTINGS ALLOWED:", repr(getattr(settings, "ALLOWED_WIFI_IPS", [])))
+    # print("DEBUG IP:", repr(ip))
+    # print("DEBUG SETTINGS ALLOWED:", repr(getattr(settings, "ALLOWED_WIFI_IPS", [])))
 
 
-    print(f"   🌐 Final IP used: {ip}")
-    print(f"   📶 WiFi Verified: {wifi_verified}")
+    # print(f"   🌐 Final IP used: {ip}")
+    # print(f"   📶 WiFi Verified: {wifi_verified}")
 
 def get_client_ip(request):
     """Get client IP address from request"""
