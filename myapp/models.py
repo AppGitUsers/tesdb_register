@@ -145,7 +145,7 @@ class Attendance(models.Model):
 class StudentAttendance(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendances')
     date = models.DateField(default=timezone.now)
-    time = models.TimeField(auto_now_add=True)
+    time = models.TimeField(null=True,blank=True)
     STATUS_CHOICES = [
         (True, 'Present'),
         (False, 'Absent'),
