@@ -114,7 +114,7 @@ class StudentTopicProgress(models.Model):
                 raise ValidationError("Start Date cannot be greater than End Date.")
 
 
-
+"""
 class Attendance(models.Model):
     staff = models.ForeignKey("Staff", on_delete=models.CASCADE, related_name="attendances")
     date = models.DateField(default=timezone.now)
@@ -141,7 +141,19 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"{self.staff.staff_name} - {self.date} "
-
+`"""
+class Attendance(models.Model):
+    staff       = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name="attendances")
+    date        = models.DateField()
+    time        = models.TimeField(null=True,blank=True)
+    source      = models.CharField(max_length=20, default='biometric')
+    device_sn   = models.CharField(max_length=50,null=True, blank=True)
+    verify_code = models.CharField(max_length=10, null=True,blank=True)
+    created_at  = models.DateTimeField(null=True, blank=True)  # keep nullable, matches existing DB
+    class Meta:
+        ordering = ['date', 'time']
+    def __str__(self):
+        return f"{self.staff.staff_name} - {self.date}"
 class StudentAttendance(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendances')
     date = models.DateField(default=timezone.now)

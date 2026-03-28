@@ -1686,42 +1686,28 @@
                 <tr>
                   <th>Staff</th>
                   <th>Date</th>
-                  <th>Time</th>
-                  <th>WiFi</th>
+                  <th>LOGIN</th>
+                  <th>LOGOUT</th>
                 </tr>
               </thead>
               <tbody>
                 {% for a in all_staff_attendance %}
                 <tr>
                   <td><strong>{{ a.staff.staff_name }}</strong></td>
-                  <td
-                    style="
-                      font-size: 12px;
-                      font-family: &quot;JetBrains Mono&quot;;
-                    "
-                  >
-                    {{ a.date }}
-                  </td>
-                  <td
-                    style="
-                      font-size: 12px;
-                      font-family: &quot;JetBrains Mono&quot;;
-                    "
-                  >
-                    {{ a.time }}
-                  </td>
-                  <!-- <td>{% if a.wifi_verified %}<span class="tag tag-green">✓ WiFi</span>{% else %}<span class="tag tag-orange">Login</span>{% endif %}</td> -->
+                  <td><strong>{{ a.date }}</strong></td>
                   <td>
-                    <button
-                      onclick="toggleWifi({{ a.id }}, this)"
-                      style="border: none; background: none; cursor: pointer"
-                    >
-                      {% if a.wifi_verified %}
-                      <span class="tag tag-green">✓ WiFi</span>
-                      {% else %}
-                      <span class="tag tag-orange">Login</span>
-                      {% endif %}
-                    </button>
+                    {% if a.login %}
+                      <span class="tag tag-orange">↑ {{ a.login|time:"H:i" }}</span>
+                    {% else %}
+                      <span style="color:var(--muted)">—</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if a.logout %}
+                      <span class="tag tag-green">✓ {{ a.logout|time:"H:i" }}</span>
+                    {% else %}
+                      <span style="color:var(--muted)">—</span>
+                    {% endif %}
                   </td>
                 </tr>
                 {% empty %}

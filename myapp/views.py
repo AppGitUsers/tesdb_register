@@ -373,6 +373,19 @@ def admin_dashboard(request):
                               for s in Staff.objects.all()],
     }
 
+    raw_att = Attendance.objects.select_related('staff').filter(date=today).order_by('staff__staff_name', 'time')
+    staff_att_map = {}
+    for a in raw_att:
+        sid = a.staff_id
+        if sid not in staff_att_map:
+            staff_att_map[sid] = {'staff': a.staff, 'date': a.date, 'login': None, 'logout': None}
+        if a.verify_code not in ('1', '5') and staff_att_map[sid]['login'] is None:
+            staff_att_map[sid]['login'] = a.time
+        if a.verify_code in ('1', '5'):
+            staff_att_map[sid]['logout'] = a.time
+    all_staff_attendance = list(staff_att_map.values())
+
+
     return render(request, 'admin_dashboard.html', {
         'stats':                  stats,
         'all_students':           Student.objects.select_related('course', 'staff', 'batch').all(),
@@ -382,7 +395,7 @@ def admin_dashboard(request):
         'all_progress':           StudentTopicProgress.objects.select_related('student', 'topic', 'topic__course').all()[:200],
         'all_batches':            Batch.objects.select_related('staff').all(),
         'all_student_attendance': StudentAttendance.objects.select_related('student', 'student__course', 'student__staff').filter(date=today).order_by('-date')[:100],
-        'all_staff_attendance':   Attendance.objects.select_related('staff').filter(date=today).order_by('-date')[:50],
+        'all_staff_attendance':   all_staff_attendance,
         'today':                  str(today),
     })
 
@@ -543,6 +556,72 @@ def _credit_monthly_leave(leave_obj, today=None):
 # ── STAFF CALENDAR HELPER ─────────────────────
 def _build_staff_calendar(staff, year, month):
     today = date.today()
+
+    from collections import defaultdict
+    daily_punches = defaultdict(lambda: {'in': None, 'out': None})
+
+    for a in Attendance.objects.filter(
+        staff=staff, date__year=year, date__month=month
+    ).order_by('time'):
+        pt = 'out' if a.verify_code in ('1','5') else 'in'
+        if pt == 'in' and daily_punches[a.date]['in'] is None:
+            daily_punches[a.date]['in'] = a
+        elif pt == 'out':
+            daily_punches[a.date]['out'] = a
+
+    weeks = []
+    for week in calendar.monthcalendar(year, month):
+        reordered = [week[6]] + week[:6]
+        row = []
+        for day_num in reordered:
+            if day_num == 0:
+                row.append(None)
+                continue
+            d         = date(year, month, day_num)
+            is_sunday = d.weekday() == 6
+            is_future = d > today
+            day_data  = daily_punches.get(d, {})
+            att_in    = day_data.get('in')
+            att_out   = day_data.get('out')
+            hours_worked = None
+            if att_in and att_out:
+                from datetime import datetime as dt_cls
+                dt_in    = dt_cls.combine(d, att_in.time)
+                dt_out   = dt_cls.combine(d, att_out.time)
+                hours_worked = round((dt_out - dt_in).seconds / 3600, 1)
+
+            row.append({
+                'day':          day_num,
+                'date':         d,
+                'is_sunday':    is_sunday,
+                'is_future':    is_future,
+                'is_present':   att_in is not None and not is_sunday,
+                'is_absent':    att_in is None and not is_sunday and not is_future,
+                'att_in':       att_in,
+                'att_out':      att_out,
+                'hours_worked': hours_worked,
+            })
+        weeks.append(row)
+
+    total_working = sum(
+        1 for dn in range(1, calendar.monthrange(year, month)[1] + 1)
+        if date(year, month, dn).weekday() != 6 and date(year, month, dn) <= today
+    )
+    present = sum(1 for d in daily_punches if d.weekday() != 6 and d <= today)
+    pct     = round(present / total_working * 100) if total_working else 0
+
+    return {
+        'weeks':              weeks,
+        'month_name':         calendar.month_name[month],
+        'year':               year,
+        'month':              month,
+        'total_working_days': total_working,
+        'present_days':       present,
+        'absent_days':        total_working - present,
+        'attendance_pct':     pct,
+    }
+"""def _build_staff_calendar(staff, year, month):
+    today = date.today()
     # Deduplicate: prefer wifi_verified row if multiple exist per date
     records = {}
     for a in Attendance.objects.filter(staff=staff, date__year=year, date__month=month):
@@ -590,7 +669,7 @@ def _build_staff_calendar(staff, year, month):
         'attendance_pct':     pct,
     }
 
-
+"""
 # ── STUDENT CALENDAR HELPER ───────────────────
 def _build_student_calendar(student, year, month):
     today = date.today()
@@ -910,63 +989,63 @@ def admin_student_progress_detail(request, student_id):
 #             source="biometric",
 #             defaults={
 #                 "time": dt.time(),
-#                 "device_sn": sn,
-#                 "verify_code": verify_code
-#             }
-#         )
-
-#         return HttpResponse("OK")
-
-#     return HttpResponse("FAILED")
-# views.py
+#                 "device_sn
 @csrf_exempt
 def iclock_data(request):
-    print(f"{request.method} request received at {request.path} from {request.META.get('REMOTE_ADDR')}")
-    print("IN ICLOCK")
-    print("IN ICLOCK")
-    # Device sends GET first to handshake — must return "OK"
     if request.method == "GET":
         return HttpResponse("OK")
 
     if request.method == "POST":
-        raw  = request.body.decode('utf-8', errors='ignore')
-        data = urllib.parse.parse_qs(raw)
+        raw   = request.body.decode('utf-8', errors='ignore').strip()
+        sn    = request.GET.get("SN",    "UNKNOWN").strip()
+        table = request.GET.get("table", "").strip()
 
-        user_id     = data.get("UserID",     [""])[0].strip()
-        check_time  = data.get("CheckTime",  [""])[0].strip()
-        sn          = data.get("SN",         ["UNKNOWN"])[0].strip()
-        verify_code = data.get("VerifyCode", ["0"])[0].strip()
-
-        if not user_id or not check_time:
+        if table != "ATTLOG":
             return HttpResponse("OK")
 
-        try:
-            staff = Staff.objects.get(staff_id=user_id)
-        except Staff.DoesNotExist:
-            logger.warning(f"[Biometric] Unknown UserID: {user_id}")
-            return HttpResponse("OK")  # Always return OK or device will retry forever
+        for line in raw.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split("\t")
+            if len(parts) < 2:
+                continue
 
-        try:
-            dt = datetime.strptime(check_time, "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            logger.error(f"[Biometric] Bad timestamp: {check_time}")
-            return HttpResponse("OK")
+            user_id     = parts[0].strip()
+            check_time  = parts[1].strip()
+            verify_code = parts[2].strip() if len(parts) > 2 else "0"
+            status_code = parts[3].strip() if len(parts) > 3 else "0"  # ← in/out signal
 
-        obj, created = Attendance.objects.get_or_create(
-            staff=staff,
-            date=dt.date(),
-            source="biometric",
-            defaults={
-                "time":        dt.time(),
-                "device_sn":   sn,
-                "verify_code": verify_code,
-            }
-        )
+            punch_type = 'out' if status_code in ('1', '5') else 'in'
+            logger.warning(f"parts={parts}")
 
-        logger.info(
-            f"[Biometric] {'NEW' if created else 'DUP'} | "
-            f"Staff: {staff.staff_name} | Time: {dt}"
-        )
+            try:
+                staff = Staff.objects.get(staff_id=user_id)
+            except Staff.DoesNotExist:
+                logger.warning(f"[Biometric] Unknown UserID: {user_id}")
+                continue
+
+            try:
+                dt = datetime.strptime(check_time, "%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                logger.error(f"[Biometric] Bad timestamp: {check_time}")
+                continue
+
+            obj, created = Attendance.objects.get_or_create(
+                staff=staff,
+                date=dt.date(),
+                time=dt.time(),
+                source="biometric",
+                defaults={
+                    "device_sn":   sn,
+                    "verify_code": verify_code,
+                }
+            )
+            logger.info(
+                f"[Biometric] {'NEW' if created else 'DUP'} | "
+                f"Staff: {staff.staff_name} | {punch_type.upper()} | Time: {dt}"
+            )
+
         return HttpResponse("OK")
 
     return HttpResponse("FAILED")
