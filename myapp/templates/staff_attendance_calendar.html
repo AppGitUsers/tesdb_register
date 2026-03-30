@@ -143,12 +143,16 @@
             <div class="sub">Attendance</div>
             <h1>📅 {{ staff.staff_name }}</h1>
         </div>
-        {% if readonly %}
-        <a href="{% url 'get_batches' %}" class="back-btn">← Dashboard</a>
-        {% else %}
-        <a href="{% url 'admin_dashboard' %}" class="back-btn">← Admin Dashboard</a>
-        {% endif %}
-    </div>
+            {% if readonly %}
+                {% if is_placement %}
+                    <a href="{% url 'placement_dashboard' %}" class="back-btn">← Placement Dashboard</a>
+                {% else %}
+                    <a href="{% url 'get_batches' %}" class="back-btn">← Dashboard</a>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'admin_dashboard' %}" class="back-btn">← Admin Dashboard</a>
+            {% endif %}
+        </div>
 
     <!-- Messages -->
     {% if messages %}

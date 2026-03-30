@@ -62,6 +62,10 @@ urlpatterns = [
      #Attendance Toggle
      path('toggle-wifi/<int:attendance_id>/', views.toggle_wifi, name='toggle_wifi'),
 
+     path('placement-dashboard/', views.placement_dashboard, name='placement_dashboard'),
+     path('add-company/', views.add_company, name='add_company'),
+     path('complete/<int:id>/', views.complete_interview, name='complete_interview'),
+     
     # Home — must be last
     path('', views.home, name='home'),
 ]

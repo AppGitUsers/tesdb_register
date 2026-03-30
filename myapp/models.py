@@ -216,3 +216,24 @@ class StaffLeaveUsage(models.Model):
 
     def __str__(self):
         return f"{self.staff.staff_name} — {self.date} ({self.leave_type})"
+
+class CompanyInterview(models.Model):
+    STATUS_CHOICES = [
+        ("ongoing", "Ongoing"),
+        ("completed", "Completed"),
+    ]
+
+    company_name = models.CharField(max_length=200)
+    role = models.CharField(max_length=200)
+    interview_date = models.DateField()
+    description = models.TextField(blank=True)
+    created_by = models.ForeignKey("Staff", on_delete=models.CASCADE, related_name="interviews")
+
+    experience = models.CharField(max_length=100, blank=True, null=True)
+    skills = models.TextField(blank=True, null=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="ongoing")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.company_name} - {self.created_by.staff_name}"
