@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Placement Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        h2 {
+            margin: 25px 0 15px;
+        }
+
+        .header-card {
+            background: #15151f;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-logout {
+            background: #ff4d6d;
+            color: white;
+        }
+
+        .btn-logout:hover {
+            background: #ff2e55;
+        }
+
+        .header-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #6c63ff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #43e97b;
+            color: black;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #15151f;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #1a1a26;
+        }
+
+        tr {
+            border-bottom: 1px solid #2a2a3d;
+        }
+
+        tr:hover {
+            background: #1f1f2e;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(6px);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal {
+            background: #12121a;
+            padding: 25px;
+            border-radius: 16px;
+            width: 360px;
+            transform: scale(0.8);
+            opacity: 0;
+            animation: popupScale 0.35s ease forwards;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popupScale {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        input, textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #1a1a26;
+            border: 1px solid #2a2a3d;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .big-modal {
+            width: 600px;
+            max-width: 90%;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .desc-box {
+            margin: 15px 0;
+            padding: 10px;
+            background: #1a1a26;
+            border-radius: 8px;
+        }
+
+        .modal h2 {
+            color: #6c63ff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header-card">
+
+    <div class="header-top">
+        <div>
+            <h1>🚀 Placement Dashboard</h1>
+            <p style="color:#aaa; margin-top:5px;">
+                Welcome, <strong>{{ staff.staff_name }}</strong>
+            </p>
+        </div>
+
+        <a href="{% url 'staff_logout' %}" class="btn btn-logout">Logout</a>
+    </div>
+
+    <div class="header-actions">
+        <a href="{% url 'staff_own_attendance' %}" class="btn btn-primary">📅 My Attendance</a>
+        <button class="btn btn-success" onclick="openModal()">＋ Add Company</button>
+    </div>
+
+</div>
+
+    <!-- 🔥 ONGOING -->
+    <h2>🔥 Ongoing Interviews</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>S.No</th>
+                <th>Company Name</th>
+                <th>Role</th>
+                <th>Interview Date</th>
+                <th>Created At</th>
+                <th>Created By</th>
+                <th>Experience</th>
+                <th>Skills</th>
+                <th>Action</th>
+                <th>View More</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for i in ongoing %}
+            <tr>
+                <td>{{i.id}}</td>
+                <td>{{ i.company_name }}</td>
+                <td>{{ i.role }}</td>
+                <td>{{ i.interview_date }}</td>
+                <td>{{ i.created_at|date:"d M Y, h:i A" }}</td>
+                <td>{{ i.created_by.staff_name }}</td>
+                <td>{{ i.experience|default:"-" }}</td>
+                <td>{{ i.skills|default:"-" }}</td>
+                
+                <td>
+                    <a href="{% url 'complete_interview' i.id %}" class="btn btn-success">✔ Done</a>
+                </td>
+                <td>
+                <button class="btn btn-primary" onclick="openDetails(
+                    '{{ i.company_name }}',
+                    '{{ i.role }}',
+                    '{{ i.interview_date }}',
+                    '{{ i.experience|default:"-" }}',
+                    '{{ i.skills|default:"-" }}',
+                    '{{ i.description|default:"-" }}',
+                    '{{ i.created_by.staff_name }}',
+                    '{{ i.created_at|date:"d M Y, h:i A" }}'
+                )">👁 View More</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="10">No ongoing interviews</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 📁 COMPLETED -->
+    <h2>📁 Completed Interviews</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Date</th>
+                <th>Created By</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for i in completed %}
+            <tr style="opacity:0.6;">
+                <td>{{ i.company_name }}</td>
+                <td>{{ i.role }}</td>
+                <td>{{ i.interview_date }}</td>
+                <td>{{ i.created_by.staff_name }}</td>
+                <td>✔ Closed</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No completed interviews</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+<div id="detailsModal" class="modal-overlay" onclick="if(event.target===this) closeDetails()">
+    <div class="modal big-modal">
+        <h2 id="d_company"></h2>
+
+        <div class="detail-grid">
+            <p><strong>💼 Role:</strong> <span id="d_role"></span></p>
+            <p><strong>📅 Interview Date:</strong> <span id="d_date"></span></p>
+            <p><strong>🧠 Experience:</strong> <span id="d_exp"></span></p>
+            <p><strong>🛠 Skills:</strong> <span id="d_skills"></span></p>
+            <p><strong>👤 Created By:</strong> <span id="d_staff"></span></p>
+            <p><strong>⏰ Created At:</strong> <span id="d_created"></span></p>
+        </div>
+
+        <div class="desc-box">
+            <strong>📝 Description:</strong>
+            <p id="d_desc"></p>
+        </div>
+
+        <button class="btn btn-primary" onclick="closeDetails()">Close</button>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal-overlay" onclick="if(event.target===this) closeModal()">
+<div class="modal">
+    <h3>Add Company</h3>
+
+    <form method="POST" action="{% url 'add_company' %}">
+        {% csrf_token %}
+        <input name="company_name" placeholder="Company Name" required>
+        <input name="role" placeholder="Role" required>
+        <input type="date" name="interview_date" required>
+        <input name="experience" placeholder="Experience">
+        <textarea name="skills" placeholder="Skills"></textarea>
+        <textarea name="description" placeholder="Description"></textarea>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+</div>
+</div>
+
+<script>
+function openModal(){
+    document.getElementById("modal").style.display = "flex";
+}
+function closeModal(){
+    document.getElementById("modal").style.display = "none";
+}
+
+function openDetails(company, role, date, exp, skills, desc, staff, created){
+    document.getElementById("d_company").innerText = company;
+    document.getElementById("d_role").innerText = role;
+    document.getElementById("d_date").innerText = date;
+    document.getElementById("d_exp").innerText = exp;
+    document.getElementById("d_skills").innerText = skills;
+    document.getElementById("d_desc").innerText = desc;
+    document.getElementById("d_staff").innerText = staff;
+    document.getElementById("d_created").innerText = created;
+
+    document.getElementById("detailsModal").style.display = "flex";
+}
+
+function closeDetails(){
+    document.getElementById("detailsModal").style.display = "none";
+}
+</script>
+
+</body>
+</html>

@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import (
     Student, StudentTopicProgress, Staff, CourseTopic,
     Attendance, StudentAttendance, Batch, Course,
-    StaffCourseProgress, StaffLeave, StaffLeaveUsage
+    StaffCourseProgress, StaffLeave, StaffLeaveUsage,CompanyInterview
 )
 from django.contrib import messages
 from django.forms import modelformset_factory
@@ -63,6 +63,10 @@ def staff_login(request):
         if user is not None:
             login(request, user)
             if hasattr(user, 'staff'):
+                staff=user.staff
+
+                if staff.courses.filter(course_name__iexact="placement").exists():
+                    return redirect('placement_dashboard')
                 return redirect('get_batches')
             return redirect('home')
         else:
@@ -792,6 +796,9 @@ def admin_staff_attendance_calendar(request, staff_id):
 @login_required
 def staff_own_attendance(request):
     staff = get_object_or_404(Staff, user=request.user)
+
+    is_placement = staff.courses.filter(course_name__iexact="placement").exists()
+
     today = date.today()
 
     leave_obj, _ = StaffLeave.objects.get_or_create(staff=staff, defaults={'join_date': today})
@@ -814,6 +821,7 @@ def staff_own_attendance(request):
         'leave_obj':      leave_obj,   'leave_unlocked': leave_unlocked,
         'unlock_date':    unlock_date, 'summaries':   [],
         'today':          today,       'readonly':    True,
+        'is_placement': is_placement
     })
 
 
@@ -1049,3 +1057,60 @@ def iclock_data(request):
         return HttpResponse("OK")
 
     return HttpResponse("FAILED")
+
+
+@login_required
+def add_company(request):
+    staff = getattr(request.user, 'staff', None)
+
+    if not staff:
+        return redirect('home')
+
+    if request.method == "POST":
+        CompanyInterview.objects.create(
+            company_name=request.POST['company_name'],
+            role=request.POST['role'],
+            interview_date=request.POST['interview_date'],
+            description=request.POST['description'],
+            created_by=staff,
+            status="ongoing",
+            experience=request.POST.get("experience"),
+            skills=request.POST.get("skills")
+        )
+        return redirect('placement_dashboard')
+
+    return redirect('placement_dashboard')
+
+@login_required
+def placement_dashboard(request):
+    staff = getattr(request.user, 'staff', None)
+
+    if not staff:
+        return redirect('home')
+
+    # 🔒 only placement staff allowed
+    if not staff.courses.filter(course_name__iexact="placement").exists():
+        return redirect('get_batches')
+
+    # SHOW ALL COMPANIES (NO FILTER)
+    ongoing = CompanyInterview.objects.filter(
+        status="ongoing"
+    ).order_by("interview_date")
+
+    completed = CompanyInterview.objects.filter(
+        status="completed"
+    ).order_by("-interview_date")
+
+    return render(request, "placement_dashboard.html", {
+        "ongoing": ongoing,
+        "completed": completed,
+        "staff": staff   # for showing name on top
+    })
+
+@login_required
+def complete_interview(request, id):
+    company = get_object_or_404(CompanyInterview, id=id)
+    company.status = "completed"
+    company.save()
+    return redirect('placement_dashboard')
+
