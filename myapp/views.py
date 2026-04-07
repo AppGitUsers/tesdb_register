@@ -943,53 +943,7 @@ def admin_student_progress_detail(request, student_id):
         'batch_id':    student.batch_id if student.batch else None,
         'back_params': request.GET.urlencode(),
     })
-# bio
-# @staff_member_required
-# @require_POST
-# def toggle_wifi(request, attendance_id):
-#     att = get_object_or_404(Attendance, id=attendance_id)
-    
-#     # Toggle value
-#     att.wifi_verified = not att.wifi_verified
-#     att.save()
 
-#     return JsonResponse({
-#         "status": "ok",
-#         "wifi_verified": att.wifi_verified
-#     })
-    
-    
-#bio
-# @csrf_exempt
-# def iclock_data(request):
-
-#     if request.method == "POST":
-
-#         raw = request.body.decode()
-#         data = urllib.parse.parse_qs(raw)
-
-#         user_id = data.get("UserID", [""])[0]
-#         check_time = data.get("CheckTime", [""])[0]
-#         sn = data.get("SN", [""])[0]
-#         verify_code = data.get("VerifyCode", [""])[0]
-
-#         if not user_id or not check_time:
-#             return HttpResponse("OK")
-
-#         try:
-#             staff = Staff.objects.get(biometric_id=user_id)
-#         except Staff.DoesNotExist:
-#             return HttpResponse("OK")
-
-#         dt = datetime.strptime(check_time, "%Y-%m-%d %H:%M:%S")
-
-#         Attendance.objects.get_or_create(
-#             staff=staff,
-#             date=dt.date(),
-#             source="biometric",
-#             defaults={
-#                 "time": dt.time(),
-#                 "device_sn
 @csrf_exempt
 def iclock_data(request):
     if request.method == "GET":
