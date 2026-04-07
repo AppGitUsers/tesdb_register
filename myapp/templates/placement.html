@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Placements</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+
+body {
+    margin:0;
+    font-family:'Space Grotesk', sans-serif;
+    background:#0a0a0f;
+    color:white;
+}
+
+/* NAVBAR */
+nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 40px;
+    background:#111;
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+nav h1{
+    color:#a855f7;
+    font-size:20px;
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.nav-links a{
+    color:#ccc;
+    text-decoration:none;
+    font-size:14px;
+    transition:0.3s;
+}
+
+.nav-links a:hover{
+    color:white;
+}
+
+/* NAV BUTTON */
+.nav-btn{
+    padding:8px 16px;
+    border-radius:6px;
+    background:linear-gradient(135deg,#6c63ff,#9f7aea);
+    color:white;
+    border:none;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.nav-btn:hover{
+    transform:scale(1.05);
+    opacity:0.9;
+}
+
+/* TITLE */
+.title {
+    text-align:center;
+    margin-top:30px;
+    font-size:26px;
+}
+
+/* TABLE BOX */
+.table-box {
+    width:90%;
+    margin:30px auto;
+    background:rgba(255,255,255,0.05);
+    border-radius:14px;
+    backdrop-filter: blur(10px);
+    overflow:hidden;
+    box-shadow:0 0 25px rgba(168,85,247,0.15);
+}
+
+/* TABLE */
+table {
+    width:100%;
+    border-collapse:collapse;
+    table-layout: fixed;
+}
+
+th {
+    background:#1a1a26;
+    padding:15px;
+    text-align: center;
+}
+
+td {
+    padding:14px;
+    color:#ddd;
+    text-align: center;
+}
+
+/* HOVER */
+tr:hover {
+    background:#1f1f2e;
+    font-weight: 600;
+}
+
+/* BUTTON */
+.apply-btn {
+    padding:6px 14px;
+    border:none;
+    border-radius:6px;
+    background:linear-gradient(135deg,#6c63ff,#9f7aea);
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.apply-btn:hover{
+    transform:scale(1.05);
+}
+
+/* EMPTY */
+.empty {
+    text-align:center;
+    padding:20px;
+    color:#888;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav>
+    <h1>Tesdb Portal</h1>
+
+    <div class="nav-links">
+        <a href="/website/">Home</a>
+        <a href="/placements/">Placements</a>
+        <a href="/login/">Login</a>
+
+        <button class="nav-btn" onclick="location.href='/placements/'">
+            Apply Now
+        </button>
+    </div>
+</nav>
+
+<h2 class="title">🚀 Ongoing Placements</h2>
+
+<div class="table-box">
+
+<table>
+    <thead>
+        <tr>
+            <th>Company</th>
+            <th>Role</th>
+            <th>Date</th>
+            <th>Experience</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody id="placementContainer"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+// ✅ No CORS issue (same Django server)
+const API_BASE = "";
+
+// 🔥 Load jobs
+async function loadJobs() {
+    try {
+        let res = await fetch(`${API_BASE}/api/jobs/`);
+
+        if (!res.ok) {
+            throw new Error("API not responding");
+        }
+
+        let data = await res.json();
+
+        let container = document.getElementById("placementContainer");
+        container.innerHTML = "";
+
+        if (data.length === 0) {
+            container.innerHTML = `
+                <tr>
+                    <td colspan="5" class="empty">
+                        No jobs available 🚫
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        data.forEach(job => {
+            let row = document.createElement("tr");
+
+            let actionBtn = "";
+
+            if(job.applied){
+                actionBtn = `<button disabled style="opacity:0.6">Applied</button>`;
+            }else{
+                actionBtn = `
+                    <button class="apply-btn" onclick="applyJob(${job.id})">
+                        Apply
+                    </button>`;
+            }
+
+            row.innerHTML = `
+                <td>${job.company_name}</td>
+                <td>${job.role}</td>
+                <td>${job.interview_date}</td>
+                <td>${job.experience || "Fresher"}</td>
+                <td>${actionBtn}</td>
+            `;
+
+            container.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error("Error loading jobs:", error);
+
+        document.getElementById("placementContainer").innerHTML = `
+            <tr>
+                <td colspan="5" class="empty">
+                    ⚠️ Unable to load jobs
+                </td>
+            </tr>`;
+    }
+}
+
+// ✅ Redirect
+function applyJob(id){
+    window.location.href = `/apply-job/${id}/`;
+}
+
+// 🚀 LOAD
+loadJobs();
+
+</script>
+
+</body>
+</html>

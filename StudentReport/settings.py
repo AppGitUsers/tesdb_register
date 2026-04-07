@@ -53,9 +53,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp',
     'django_extensions',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -175,3 +177,15 @@ LOGIN_REDIRECT_URL = '/admin/'   # sends you to admin dashboard after login
 LOGOUT_REDIRECT_URL = '/'        # optional: send users to home after logout
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    "*",
+]
+
+CORS_ALLOW_METHODS = [
+    "*",
+]

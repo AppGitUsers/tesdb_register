@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Apply Job</title>
+
+    <style>
+      body {
+        background: #0a0a0f;
+        color: white;
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .form-box {
+        background: #15151f;
+        padding: 30px;
+        border-radius: 15px;
+        width: 350px;
+        box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 15px;
+      }
+
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: none;
+        border-radius: 6px;
+        background: #1f1f2e;
+        color: white;
+      }
+
+      input[type="file"] {
+        background: none;
+      }
+
+      button {
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(to right, purple, blue);
+        border: none;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      .msg {
+        color: #43e97b;
+        text-align: center;
+      }
+
+      .err {
+        color: #ff4d6d;
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="form-box">
+      <h2>Apply for {{ company.company_name }}</h2>
+
+      {% if success %}
+      <p class="msg">{{ success }}</p>
+      {% endif %} {% if error %}
+      <p class="err">{{ error }}</p>
+      {% endif %}
+
+      <!-- 🔥 IMPORTANT: enctype -->
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <input type="text" name="name" placeholder="Full Name" required />
+        <input type="email" name="email" placeholder="Email Address" required />
+        <input type="text" name="phone" placeholder="Phone Number" required />
+        <input
+          type="text"
+          name="course"
+          placeholder="Course (Python / Java)"
+          required
+        />
+
+        <input type="file" name="resume" required />
+
+        <button type="submit">🚀 Apply Now</button>
+      </form>
+    </div>
+  </body>
+</html>
