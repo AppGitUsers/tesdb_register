@@ -3,6 +3,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 
 
 # Professional mobile number validation (India)
@@ -244,3 +245,52 @@ class StaffLeaveUsage(models.Model):
 
     def __str__(self):
         return f"{self.staff.staff_name} — {self.date} ({self.leave_type})"
+
+
+class CompanyInterview(models.Model):
+    STATUS_CHOICES = [
+        ("ongoing", "Ongoing"),
+        ("completed", "Completed"),
+    ]
+
+    company_name = models.CharField(max_length=200)
+    role = models.CharField(max_length=200)
+    interview_date = models.DateField()
+
+    description = models.TextField(blank=True)
+
+    # 🔥 ADD THESE
+    location = models.CharField(max_length=200, blank=True, null=True)
+    salary = models.CharField(max_length=100, blank=True, null=True)
+
+    created_by = models.ForeignKey("Staff", on_delete=models.CASCADE, related_name="interviews")
+
+    experience = models.CharField(max_length=100, blank=True, null=True)
+    skills = models.TextField(blank=True, null=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="ongoing")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.company_name} - {self.role}"
+
+class JobApplication(models.Model):
+
+    STATUS_CHOICES = [
+        ('applied', 'Applied'),
+        ('shortlisted', 'Shortlisted'),
+        ('rejected', 'Rejected'),
+        ('selected', 'Selected'),
+    ]
+
+    student = models.ForeignKey("Student", on_delete=models.CASCADE)
+    company = models.ForeignKey("CompanyInterview", on_delete=models.CASCADE)
+
+    resume = models.CharField(max_length=500)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='applied')
+
+    applied_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.student.student_name} → {self.company.company_name}"

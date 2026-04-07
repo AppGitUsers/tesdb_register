@@ -4,10 +4,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import FileResponse
 from .models import (
     Student, StudentTopicProgress, Staff, CourseTopic,
     Attendance, StudentAttendance, Batch, Course,
-    StaffCourseProgress, StaffLeave, StaffLeaveUsage
+    StaffCourseProgress, StaffLeave, StaffLeaveUsage,CompanyInterview,JobApplication
 )
 from django.contrib import messages
 from django.forms import modelformset_factory
@@ -19,6 +20,8 @@ from datetime import date, datetime
 import logging
 import json
 import calendar
+import os
+import uuid
 from dateutil.relativedelta import relativedelta
 from django.views.decorators.http import require_POST
 #bio
@@ -63,6 +66,10 @@ def staff_login(request):
         if user is not None:
             login(request, user)
             if hasattr(user, 'staff'):
+                staff=user.staff
+
+                if staff.courses.filter(course_name__iexact="placement").exists():
+                    return redirect('placement_dashboard')
                 return redirect('get_batches')
             return redirect('home')
         else:
@@ -792,6 +799,9 @@ def admin_staff_attendance_calendar(request, staff_id):
 @login_required
 def staff_own_attendance(request):
     staff = get_object_or_404(Staff, user=request.user)
+
+    is_placement = staff.courses.filter(course_name__iexact="placement").exists()
+
     today = date.today()
 
     leave_obj, _ = StaffLeave.objects.get_or_create(staff=staff, defaults={'join_date': today})
@@ -814,6 +824,7 @@ def staff_own_attendance(request):
         'leave_obj':      leave_obj,   'leave_unlocked': leave_unlocked,
         'unlock_date':    unlock_date, 'summaries':   [],
         'today':          today,       'readonly':    True,
+        'is_placement': is_placement
     })
 
 
@@ -1003,3 +1014,197 @@ def iclock_data(request):
         return HttpResponse("OK")
 
     return HttpResponse("FAILED")
+
+
+@login_required
+def add_company(request):
+    staff = getattr(request.user, 'staff', None)
+
+    if not staff:
+        return redirect('home')
+
+    if request.method == "POST":
+        CompanyInterview.objects.create(
+            company_name=request.POST['company_name'],
+            role=request.POST['role'],
+            interview_date=request.POST['interview_date'],
+            description=request.POST['description'],
+            created_by=staff,
+            status="ongoing",
+            experience=request.POST.get("experience"),
+            skills=request.POST.get("skills")
+        )
+        return redirect('placement_dashboard')
+
+    return redirect('placement_dashboard')
+
+@login_required
+def placement_dashboard(request):
+    staff = getattr(request.user, 'staff', None)
+
+    if not staff:
+        return redirect('home')
+
+    # 🔒 only placement staff allowed
+    if not staff.courses.filter(course_name__iexact="placement").exists():
+        return redirect('get_batches')
+
+    # SHOW ALL COMPANIES (NO FILTER)
+    ongoing = CompanyInterview.objects.filter(
+        status="ongoing"
+    ).order_by("interview_date")
+
+    completed = CompanyInterview.objects.filter(
+        status="completed"
+    ).order_by("-interview_date")
+
+    return render(request, "placement_dashboard.html", {
+        "ongoing": ongoing,
+        "completed": completed,
+        "staff": staff   # for showing name on top
+    })
+
+@login_required
+def complete_interview(request, id):
+    company = get_object_or_404(CompanyInterview, id=id)
+    company.status = "completed"
+    company.save()
+    return redirect('placement_dashboard')
+
+@login_required
+def view_applications(request, company_id):
+    company = get_object_or_404(CompanyInterview, id=company_id)
+
+    applications = JobApplication.objects.filter(company=company)
+
+    return render(request, "view_applications.html", {
+        "company": company,
+        "applications": applications
+    })
+
+@login_required
+def download_resume(request, app_id):
+    app = get_object_or_404(JobApplication, id=app_id)
+
+    # 🔥 HANDLE BOTH CASES
+    if hasattr(app.resume, 'path'):
+        file_path = app.resume.path   # FileField case
+    else:
+        file_path = app.resume        # CharField case
+
+    if not os.path.exists(file_path):
+        return HttpResponse(f"File not found: {file_path}")
+
+    return FileResponse(
+        open(file_path, 'rb'),
+        as_attachment=True,
+        filename=os.path.basename(file_path)
+    )
+
+def api_jobs(request):
+    jobs = CompanyInterview.objects.filter(status="ongoing")
+
+    data = []
+    for job in jobs:
+        applied = False
+
+        if request.user.is_authenticated:
+            student = Student.objects.filter(student_email=request.user.username).first()
+            if student:
+                applied = JobApplication.objects.filter(
+                    student=student,
+                    company=job
+                ).exists()
+
+        data.append({
+            "id": job.id,
+            "company_name": job.company_name,
+            "role": job.role,
+            "interview_date": str(job.interview_date),
+            "experience": job.experience,
+            "applied": applied
+        })
+
+    return JsonResponse(data, safe=False)
+
+def website(request):
+    return render(request, "website.html")
+
+
+RESUME_DIR = r"D:\placement_resumes"
+
+def apply_job(request, company_id):
+    company = get_object_or_404(CompanyInterview, id=company_id)
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        course_name = request.POST.get("course")
+        resume = request.FILES.get("resume")
+
+        if not resume:
+            return render(request, "apply_job.html", {
+                "company": company,
+                "error": "Upload resume!"
+            })
+
+        # create folder
+        if not os.path.exists(RESUME_DIR):
+            os.makedirs(RESUME_DIR)
+
+        # unique file
+        filename = str(uuid.uuid4()) + "_" + resume.name
+        file_path = os.path.join(RESUME_DIR, filename)
+
+        # save file
+        with open(file_path, 'wb+') as f:
+            for chunk in resume.chunks():
+                f.write(chunk)
+
+        # course
+        course = Course.objects.filter(course_name__iexact=course_name).first()
+
+        if not course:
+            course = Course.objects.create(course_name=course_name)
+            
+        # student
+        student, _ = Student.objects.get_or_create(
+            student_email=email,
+            defaults={
+                "student_name": name,
+                "student_contact": phone,
+                "join_date": date.today(),
+                "course": course
+            }
+        )
+
+        # duplicate check
+        if JobApplication.objects.filter(student=student, company=company).exists():
+            return render(request, "apply_job.html", {
+                "company": company,
+                "error": "Already applied!"
+            })
+
+        # save DB
+        JobApplication.objects.create(
+            student=student,
+            company=company,
+            resume=file_path
+        )
+
+        return render(request, "apply_job.html", {
+            "company": company,
+            "success": "Applied successfully 🎉"
+        })
+
+        return redirect("placement_page")
+
+    return render(request, "apply_job.html", {"company": company})
+
+def placement_page(request):
+    jobs = CompanyInterview.objects.filter(status="ongoing").order_by("interview_date")
+
+    return render(request, "placement.html", {
+        "jobs": jobs
+    })
