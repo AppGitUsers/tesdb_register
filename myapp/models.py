@@ -266,3 +266,22 @@ class CompanyInterview(models.Model):
 
     def __str__(self):
         return f"{self.company_name} - {self.created_by.staff_name}"
+
+
+class StudentProgressDashboard(models.Model):
+    student = models.OneToOneField("Student", on_delete=models.CASCADE, related_name="dashboard")
+
+    total_topics = models.IntegerField(default=0)
+    finished_topics = models.IntegerField(default=0)
+
+    ready_to_placement = models.BooleanField(default=False)
+    placed = models.BooleanField(default=False)
+
+    no_of_interviews = models.IntegerField(default=0)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.student.student_name} Dashboard"
+    
+    

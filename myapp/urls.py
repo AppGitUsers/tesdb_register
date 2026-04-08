@@ -31,6 +31,11 @@ urlpatterns = [
 
     # Staff — add student modal
     path('staff/add-student/', views.staff_add_student, name='staff_add_student'),
+    path("dashboard/", views.dashboard_view, name="dashboard"),
+
+     #Staff - placement status update
+    path('toggle-placement/<int:student_id>/', views.toggle_placement, name='toggle_placement'),
+    path('toggle-ready/<int:student_id>/', views.toggle_ready, name='toggle_ready'),
 
     # Staff — course self-learning API
     path('staff/course-topics/<int:course_id>/', views.staff_course_topics, name='staff_course_topics'),
@@ -48,6 +53,7 @@ urlpatterns = [
     path('admin-dashboard/add-topic/',   views.admin_add_topic,   name='admin_add_topic'),
     path('admin-dashboard/add-staff/',   views.admin_add_staff,   name='admin_add_staff'),
     path('admin-dashboard/enroll-staff/', views.admin_enroll_staff, name='admin_enroll_staff'),
+    path("admin-dashboard/", views.dashboard_view, name="admin_student_progress"),
 
     # Admin — attendance calendars
     path('admin-dashboard/staff-attendance/<int:staff_id>/',

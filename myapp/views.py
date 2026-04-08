@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import (
     Student, StudentTopicProgress, Staff, CourseTopic,
     Attendance, StudentAttendance, Batch, Course,
-    StaffCourseProgress, StaffLeave, StaffLeaveUsage,CompanyInterview
+    StaffCourseProgress, StaffLeave, StaffLeaveUsage,CompanyInterview,StudentProgressDashboard
 )
 from django.contrib import messages
 from django.forms import modelformset_factory
@@ -232,6 +232,7 @@ def add_progress(request, student_id, batch_id):
                     progress.sign = staff.staff_name
                 progress.save()
                 form.save_m2m()
+            update_single_student_progress(student)
             return redirect('student_detail', student_id=student.pk, batch_id=batch.pk)
     else:
         formset = ProgressFormSet(queryset=queryset)
@@ -305,12 +306,29 @@ def staff_add_student(request):
                 messages.error(request, 'You are not assigned to that course.')
                 return redirect('get_batches')
             batch = get_object_or_404(Batch, pk=batch_id, staff=staff) if batch_id else None
-            Student.objects.create(
-                student_name=student_name, student_email=student_email,
-                student_contact=student_contact, join_date=join_date,
-                course=course, staff=staff, batch=batch, mode=mode,
+            student = Student.objects.create(
+                student_name=student_name,
+                student_email=student_email,
+                student_contact=student_contact,
+                join_date=join_date,
+                course=course,
+                staff=staff,
+                batch=batch,
+                mode=mode,
             )
+            update_single_student_progress(student)
             messages.success(request, f'Student "{student_name}" added successfully!')
+
+            # # ✅ Progress creation
+            # topics_count = course.topics.count()
+
+            # StudentProgressDashboard.objects.update_or_create(
+            #     student=student,
+            #     defaults={
+            #         "total_topics": topics_count,
+            #         "finished_topics": 0
+            #     }
+            # )
         except Exception as e:
             messages.error(request, f'Error adding student: {e}')
     return redirect('get_batches')
@@ -388,10 +406,14 @@ def admin_dashboard(request):
         if a.verify_code in ('1', '5'):
             staff_att_map[sid]['logout'] = a.time
     all_staff_attendance = list(staff_att_map.values())
-
+    
+    dashboards = StudentProgressDashboard.objects.select_related(
+    "student", "student__course"
+    ).all()
 
     return render(request, 'admin_dashboard.html', {
         'stats':                  stats,
+        'dashboards' :            dashboards,
         'all_students':           Student.objects.select_related('course', 'staff', 'batch').all(),
         'all_staff':              Staff.objects.prefetch_related('courses').all(),
         'all_courses':            Course.objects.prefetch_related('staffs').all(),
@@ -432,7 +454,7 @@ def admin_add_student(request):
             course = get_object_or_404(Course, pk=request.POST['course'])
             staff_id = request.POST.get('staff') or None
             batch_id = request.POST.get('batch') or None
-            Student.objects.create(
+            student = Student.objects.create(
                 student_name=request.POST['student_name'].strip(),
                 student_email=request.POST['student_email'].strip(),
                 student_contact=request.POST.get('student_contact', '').strip(),
@@ -442,6 +464,7 @@ def admin_add_student(request):
                 batch=get_object_or_404(Batch, pk=batch_id) if batch_id else None,
                 mode=request.POST.get('mode', 'True') == 'True',
             )
+            update_single_student_progress(student)
             messages.success(request, f'Student added successfully!')
         except Exception as e:
             messages.error(request, f'Error: {e}')
@@ -1113,4 +1136,75 @@ def complete_interview(request, id):
     company.status = "completed"
     company.save()
     return redirect('placement_dashboard')
+
+#studentProgressDashboardAdmin
+def update_single_student_progress(student):
+    topics_count = CourseTopic.objects.filter(
+    course=student.course).count()
+
+    finished_topics = StudentTopicProgress.objects.filter(
+        student=student,
+        end_date__isnull=False
+    ).count()
+
+    print("DEBUG:", student.student_id, topics_count, finished_topics)
+
+    StudentProgressDashboard.objects.update_or_create(
+        student=student,
+        defaults={
+            "total_topics": topics_count,
+            "finished_topics": finished_topics
+        }
+    )
+
+
+def studentprogress_dashboard():
+    from django.db.models import Count,Q
+    students = Student.objects.select_related("course", "staff").prefetch_related("course__topics").annotate(
+    finished_topics=Count('studenttopicprogress', filter=Q(studenttopicprogress__end_date__isnull=False)))
+
+    for s in students:
+       topics_count = s.course.topics.count()
+       finished_topics = s.finished_topics
+       StudentProgressDashboard.objects.update_or_create(
+            student=s,
+            defaults={
+                "total_topics": topics_count,
+                "finished_topics": finished_topics
+            })
+    print(f"{topics_count}, {finished_topics}, {s.student_name}")
+    
+
+@login_required
+def dashboard_view(request):
+    dashboards = StudentProgressDashboard.objects.select_related("student").all()
+    return render(request, "dashboard.html", {"dashboards": dashboards})
+
+
+@login_required
+@require_POST
+def toggle_placement(request, student_id):
+    student = get_object_or_404(Student, pk=student_id)
+
+    dashboard, _ = StudentProgressDashboard.objects.get_or_create(student=student)
+
+    # Toggle placement
+    dashboard.placed = not dashboard.placed
+    dashboard.save(update_fields=["placed"])
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required
+@require_POST
+def toggle_ready(request, student_id):
+    student = get_object_or_404(Student, pk=student_id)
+
+    dashboard, _ = StudentProgressDashboard.objects.get_or_create(student=student)
+
+    # Toggle ready status
+    dashboard.ready_to_placement = not dashboard.ready_to_placement
+    dashboard.save(update_fields=["ready_to_placement"])
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
 

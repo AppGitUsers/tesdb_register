@@ -1163,6 +1163,71 @@
           </div>
         </div>
       </div>
+<!-- ===================== STUDENT DASHBOARD ===================== -->
+<div class="section-title">📊 Student Progress Overview</div>
+
+<div class="table-card">
+  <div class="table-header">
+    <div class="table-title">🎯 Placement Readiness</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Staff</th>
+        <th>Course</th>
+        <th>Topics</th>
+        <th>Finished Topics</th>
+        <th>Ready To Placement</th>
+        <th>Placed</th>
+        <th>No Of Interviews</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for d in dashboards %}
+      <tr>
+        <td>{{ d.student.student_name }}</td>
+        <td>{{d.student.staff}}</td>
+        <td>{{ d.student.course.course_name }}</td>
+        <td>{{ d.total_topics }}</td>
+        <td>{{d.finished_topics}}</td>
+
+        <!-- READY STATUS -->
+        <td>
+          {% if d.ready_to_placement %}
+            <span class="tag tag-green">Ready</span>
+          {% else %}
+            <span class="tag tag-orange">Learning</span>
+          {% endif %}
+        </td>
+
+        <!-- PLACED -->
+        <td>
+          {% if d.placed %}
+            <span class="tag tag-green">Placed 🎉</span>
+          {% else %}
+            <span class="tag tag-red">Not Yet</span>
+          {% endif %}
+        </td>
+
+        <!-- INTERVIEWS -->
+        <td>
+          <span class="tag tag-blue">{{ d.no_of_interviews }}</span>
+        </td>
+      </tr>
+
+      {% empty %}
+      <tr>
+        <td colspan="6" style="text-align:center; padding:30px; color:var(--muted);">
+          No student progress data available
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
       <!-- ===================== STUDENTS ===================== -->
       <div id="section-students" class="tab-content">

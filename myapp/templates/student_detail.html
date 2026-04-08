@@ -30,8 +30,33 @@
             padding:28px 32px;margin-bottom:24px;
             animation:fadeDown 0.5s ease both;
         }
+        .placement-btn {
+            width: 150px;
+            height: 40px;
+            background: rgba(67,233,123,0.15);
+            color: var(--accent3);
+            border: 1px solid rgba(67,233,123,0.3);
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-placement {
+            background: rgba(255, 101, 132, 0.15);
+            color: var(--accent2);
+            border: 1px solid rgba(255, 101, 132, 0.3);
+        }
+
+        .placement-btn:hover {
+            background: rgba(67,233,123,0.25);
+            transform: translateY(-1px);
+        }
+        .btn-ready {
+            background: rgba(108, 99, 255, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(108, 99, 255, 0.3);
+        }
         @keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
-        .student-name-title{font-size:26px;font-weight:700;letter-spacing:-0.5px;margin-bottom:20px;}
+        .student-name-title{font-size:26px;font-weight:700;letter-spacing:-0.5px;margin-bottom:20px;display: flex;align-items: center;justify-content: space-between;}
         .student-name-title span{color:var(--accent);}
 
         .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
@@ -95,7 +120,39 @@
     <a href="{% url 'student_list' batch_id %}" class="back-btn">← Back to Students</a>
 
     <div class="header-card">
-        <div class="student-name-title">{{ student.student_name }} <span>— {{ student.course.course_name }}</span></div>
+        <div class="student-name-title">
+            <div class="title-left">
+                {{ student.student_name }} 
+                <span>— {{ student.course.course_name }}</span>
+            </div>
+            <form method="post" action="{% url 'toggle_ready' student.student_id %}">
+                {% csrf_token %}
+                <button type="submit" 
+                    class="btn {% if student.dashboard and student.dashboard.ready_to_placement %}btn-green{% else %}btn-placement{% endif %}">
+                    
+                    {% if student.dashboard and student.dashboard.ready_to_placement %}
+                        🚀 Ready To Placement
+                    {% else %}
+                        ⏳ Not Ready To Placement
+                    {% endif %}
+                    
+                </button>
+            </form>
+            <form method="post" action="{% url 'toggle_placement' student.student_id %}">
+                {% csrf_token %}
+                <button type="submit" 
+                    class="btn {% if student.dashboard and student.dashboard.placed %}btn-green{% else %}btn-placement{% endif %}">
+        
+                    {% if student.dashboard and student.dashboard.placed %}
+                    ✅ Placed
+                    {% else %}
+                    ❌ Not Placed
+                    {% endif %}
+        
+                </button>
+            </form>
+        </div>
+            
         <div class="info-grid">
             <div class="info-item">
                 <div class="info-icon">📧</div>
