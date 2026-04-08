@@ -182,6 +182,9 @@
     <div class="header-actions">
         <a href="{% url 'staff_own_attendance' %}" class="btn btn-primary">📅 My Attendance</a>
         <button class="btn btn-success" onclick="openModal()">＋ Add Company</button>
+        <a href="{% url 'placement_page' %}" class="btn btn-primary">
+        🚀 Apply Now
+        </a>
     </div>
 
 </div>
@@ -227,9 +230,10 @@
                     '{{ i.interview_date }}',
                     '{{ i.experience|default:"-" }}',
                     '{{ i.skills|default:"-" }}',
-                    '{{ i.description|default:"-" }}',
+                    '{{ i.description|escapejs|default:"-" }}',
                     '{{ i.created_by.staff_name }}',
-                    '{{ i.created_at|date:"d M Y, h:i A" }}'
+                    '{{ i.created_at|date:"d M Y, h:i A" }}',
+                    '{{i.id}}'
                 )">👁 View More</button>
                 </td>
             </tr>
@@ -289,6 +293,9 @@
         </div>
 
         <button class="btn btn-primary" onclick="closeDetails()">Close</button>
+        <a id="applicantsBtn" class="btn btn-primary">
+        📥 Applied Candidates
+        </a>
     </div>
 </div>
 
@@ -318,7 +325,7 @@ function closeModal(){
     document.getElementById("modal").style.display = "none";
 }
 
-function openDetails(company, role, date, exp, skills, desc, staff, created){
+function openDetails(company, role, date, exp, skills, desc, staff, created,id){
     document.getElementById("d_company").innerText = company;
     document.getElementById("d_role").innerText = role;
     document.getElementById("d_date").innerText = date;
@@ -328,7 +335,11 @@ function openDetails(company, role, date, exp, skills, desc, staff, created){
     document.getElementById("d_staff").innerText = staff;
     document.getElementById("d_created").innerText = created;
 
+
+    
     document.getElementById("detailsModal").style.display = "flex";
+
+    document.getElementById("applicantsBtn").href = "/view-applications/" + id + "/";
 }
 
 function closeDetails(){

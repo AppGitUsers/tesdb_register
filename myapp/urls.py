@@ -77,7 +77,13 @@ urlpatterns = [
      path('placement-dashboard/', views.placement_dashboard, name='placement_dashboard'),
      path('add-company/', views.add_company, name='add_company'),
      path('complete/<int:id>/', views.complete_interview, name='complete_interview'),
-     
+     path('view-applications/<int:company_id>/', views.view_applications, name='view_applications'),
+     path('download-resume/<int:app_id>/', views.download_resume, name='download_resume'),
+     path("api/jobs/", views.api_jobs, name="api_jobs"),
+     path("apply-job/<int:company_id>/", views.apply_job, name="apply_job"),
+     path("website/", views.website, name="website"),
+     path("placements/", views.placement_page, name="placement_page"),
+
     # Home — must be last
     path('', views.home, name='home'),
 ]
