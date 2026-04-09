@@ -282,12 +282,12 @@ class JobApplication(models.Model):
         ('rejected', 'Rejected'),
         ('selected', 'Selected'),
     ]
-
-    student = models.ForeignKey("Student", on_delete=models.CASCADE)
+    course = models.CharField(max_length=80,null=True,blank=True)
+    student = models.CharField(max_length=100)
     company = models.ForeignKey("CompanyInterview", on_delete=models.CASCADE)
-
+    email = models.EmailField(null=True,blank=True)
     resume = models.CharField(max_length=500)
-
+    phoneNumber = models.CharField(max_length=10,null=True,blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='applied')
 
     applied_at = models.DateTimeField(auto_now_add=True)
