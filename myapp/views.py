@@ -1257,34 +1257,37 @@ def apply_job(request, company_id):
                 f.write(chunk)
 
         # course
-        course = Course.objects.filter(course_name__iexact=course_name).first()
+        # course = Course.objects.filter(course_name__iexact=course_name).first()
 
-        if not course:
-            course = Course.objects.create(course_name=course_name)
+        # if not course:
+        #     course = Course.objects.create(course_name=course_name)
             
         # student
-        student, _ = Student.objects.get_or_create(
-            student_email=email,
-            defaults={
-                "student_name": name,
-                "student_contact": phone,
-                "join_date": date.today(),
-                "course": course
-            }
-        )
+        # student, _ = Student.objects.get_or_create(
+        #     student_email=email,
+        #     defaults={
+        #         "student_name": name,
+        #         "student_contact": phone,
+        #         "join_date": date.today(),
+        #         "course": course_name
+        #     }
+        # )
 
         # duplicate check
-        if JobApplication.objects.filter(student=student, company=company).exists():
-            return render(request, "apply_job.html", {
-                "company": company,
-                "error": "Already applied!"
-            })
+        # if JobApplication.objects.filter(student=student, company=company).exists():
+        #     return render(request, "apply_job.html", {
+        #         "company": company,
+        #         "error": "Already applied!"
+        #     })
 
         # save DB
         JobApplication.objects.create(
-            student=student,
+            student=name,
             company=company,
-            resume=file_path
+            resume=file_path,
+            email=email,
+            phoneNumber=phone,
+            course=course_name
         )
 
         return render(request, "apply_job.html", {

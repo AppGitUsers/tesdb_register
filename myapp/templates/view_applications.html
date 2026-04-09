@@ -143,15 +143,15 @@
             <tr>
                 <td>{{ forloop.counter }}</td>
 
-                <td>{{ app.student.student_name }}</td>
+                <td>{{ app.student }}</td>
 
                 <td>
                     <span class="badge">
-                        {{ app.student.course.course_name }}
+                        {{ app.course }}
                     </span>
                 </td>
 
-                <td>{{ app.student.student_email }}</td>
+                <td>{{ app.email }}</td>
 
                 <td>{{ app.applied_at|date:"d M Y, h:i A" }}</td>
 
