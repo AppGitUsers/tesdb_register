@@ -6,8 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myapp', '0005_companyinterview'),
-        ('myapp', '0013_remove_attendance_punch_type'),
+        ('myapp', '0005_alter_jobapplication_resume'),
+        ('myapp', '0004_companyinterview_location_companyinterview_salary_and_more'),
     ]
 
     operations = [
