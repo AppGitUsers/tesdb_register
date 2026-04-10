@@ -54,7 +54,7 @@ urlpatterns = [
     path('admin-dashboard/add-staff/',   views.admin_add_staff,   name='admin_add_staff'),
     path('admin-dashboard/enroll-staff/', views.admin_enroll_staff, name='admin_enroll_staff'),
     path("admin-dashboard/", views.dashboard_view, name="admin_student_progress"),
-
+    path("edit-company/<int:id>/", views.edit_company, name="edit_company"),
     # Admin — attendance calendars
     path('admin-dashboard/staff-attendance/<int:staff_id>/',
          views.admin_staff_attendance_calendar,

@@ -1050,12 +1050,14 @@ def add_company(request):
         CompanyInterview.objects.create(
             company_name=request.POST['company_name'],
             role=request.POST['role'],
-            interview_date=request.POST['interview_date'],
+            interview_date=request.POST.get('interview_date','').strip() or None,
             description=request.POST['description'],
             created_by=staff,
             status="ongoing",
             experience=request.POST.get("experience"),
-            skills=request.POST.get("skills")
+            skills=request.POST.get("skills"),
+            location=request.POST.get("location"),
+            salary=request.POST.get("salary"),
         )
         return redirect('placement_dashboard')
 
@@ -1216,7 +1218,9 @@ def api_jobs(request):
             "role": job.role,
             "interview_date": str(job.interview_date),
             "experience": job.experience,
-            "applied": applied
+            "applied": applied,
+            "location": job.location,
+            "salary": job.salary,
         })
 
     return JsonResponse(data, safe=False)
@@ -1305,3 +1309,19 @@ def placement_page(request):
     return render(request, "placement.html", {
         "jobs": jobs
     })
+
+
+@login_required
+def edit_company(request, id):
+    company = get_object_or_404(CompanyInterview, id=id)
+    if request.method == "POST":
+        company.company_name   = request.POST.get("company_name", company.company_name)
+        company.role           = request.POST.get("role", company.role)
+        company.interview_date = request.POST.get("interview_date") or None
+        company.experience     = request.POST.get("experience")
+        company.location       = request.POST.get("location")
+        company.salary         = request.POST.get("salary")
+        company.skills         = request.POST.get("skills")
+        company.description    = request.POST.get("description")
+        company.save()
+    return redirect("placement_dashboard")
