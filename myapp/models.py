@@ -255,7 +255,7 @@ class CompanyInterview(models.Model):
 
     company_name = models.CharField(max_length=200)
     role = models.CharField(max_length=200)
-    interview_date = models.DateField()
+    interview_date = models.DateField(null=True, blank=True)
 
     description = models.TextField(blank=True)
 
@@ -287,7 +287,7 @@ class JobApplication(models.Model):
     company = models.ForeignKey("CompanyInterview", on_delete=models.CASCADE)
     email = models.EmailField(null=True,blank=True)
     resume = models.CharField(max_length=500)
-    phoneNumber = models.CharField(max_length=10,null=True,blank=True)
+    phoneNumber = models.CharField(max_length=20,null=True,blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='applied')
 
     applied_at = models.DateTimeField(auto_now_add=True)
