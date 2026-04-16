@@ -377,6 +377,16 @@ def admin_dashboard(request):
     from django.db.models import Count
     today = localdate()
 
+    selected_date = request.GET.get('date')
+
+    if selected_date:
+        try:
+            selected_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+        except:
+            selected_date = today
+    else:
+        selected_date = today
+
     courses_qs = Course.objects.annotate(student_count=Count('students'))
     max_count  = max((c.student_count for c in courses_qs), default=1) or 1
 
@@ -387,9 +397,9 @@ def admin_dashboard(request):
         'total_topics':      CourseTopic.objects.count(),
         'total_batches':     Batch.objects.count(),
         'online_students':   Student.objects.filter(mode=False).count(),
-        'present_today':     StudentAttendance.objects.filter(date=today, status=True).count(),
-        'absent_today':      StudentAttendance.objects.filter(date=today, status=False).count(),
-        'today_attendance':  StudentAttendance.objects.filter(date=today, status=True).count(),
+        'present_today':     StudentAttendance.objects.filter(date=selected_date, status=True).count(),
+        'absent_today':      StudentAttendance.objects.filter(date=selected_date, status=False).count(),
+        'today_attendance':  StudentAttendance.objects.filter(date=selected_date, status=True).count(),
         'course_enrollment': [{'name': c.course_name, 'count': c.student_count,
                                 'pct': round(c.student_count / max_count * 100)} for c in courses_qs],
         'recent_students':   Student.objects.select_related('course', 'staff').order_by('-join_date')[:8],
@@ -398,7 +408,7 @@ def admin_dashboard(request):
                               for s in Staff.objects.all()],
     }
 
-    raw_att = Attendance.objects.select_related('staff').filter(date=today).order_by('staff__staff_name', 'time')
+    raw_att = Attendance.objects.select_related('staff').filter(date=selected_date).order_by('staff__staff_name', 'time')
     staff_att_map = {}
     for a in raw_att:
         sid = a.staff_id
@@ -425,9 +435,10 @@ def admin_dashboard(request):
         'all_topics':             CourseTopic.objects.select_related('course').all(),
         'all_progress':           StudentTopicProgress.objects.select_related('student', 'topic', 'topic__course').all()[:200],
         'all_batches':            Batch.objects.select_related('staff').all(),
-        'all_student_attendance': StudentAttendance.objects.select_related('student', 'student__course', 'student__staff').filter(date=today).order_by('-date')[:100],
+        'all_student_attendance': StudentAttendance.objects.select_related('student', 'student__course', 'student__staff').filter(date=selected_date).order_by('-date')[:100],
         'all_staff_attendance':   all_staff_attendance,
-        'today':                  str(today),
+        'today': selected_date.strftime("%Y-%m-%d"),
+        'selected_date': selected_date,
     })
 
 

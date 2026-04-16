@@ -1730,16 +1730,11 @@
       <div id="section-attendance" class="tab-content">
         <div class="top-header">
           <div class="page-title">Attendance</div>
-          <div class="header-actions">
-            <input
-              type="date"
-              id="att-date-filter"
+            <input type="date"
               class="search-box"
-              style="width: 160px"
-              onchange="filterAttendance()"
-              value="{{ today }}"
-            />
-          </div>
+              style="width:160px"
+              value="{{ selected_date|date:'Y-m-d' }}"
+              onchange="changeDate(this.value)">
         </div>
         <div class="grid-2">
           <div class="table-card">
@@ -2172,14 +2167,14 @@
         filterTable("student-table", staffName);
       }
 
-      function filterAttendance() {
-        const val = document.getElementById("att-date-filter").value;
-        document
-          .querySelectorAll("#student-att-table tbody tr")
-          .forEach((r) => {
-            r.style.display = !val || r.dataset.date === val ? "" : "none";
-          });
-      }
+      // function filterAttendance() {
+      //   const val = document.getElementById("att-date-filter").value;
+      //   document
+      //     .querySelectorAll("#student-att-table tbody tr")
+      //     .forEach((r) => {
+      //       r.style.display = !val || r.dataset.date === val ? "" : "none";
+      //     });
+      // }
 
       // Badge counts
       document.getElementById("badge-students").textContent =
@@ -2275,6 +2270,20 @@
       // Reset course selection
       courseSelect.value = "";
     }
-    </script>
+
+      function changeDate(date){
+        window.location.href = "/admin-dashboard/?date=" + date + "&section=attendance";
+      }
+
+      window.onload = function() {
+          const params = new URLSearchParams(window.location.search);
+          const section = params.get("section");
+
+          if(section){
+              const el = document.querySelector(`[onclick*="${section}"]`);
+              showSection(section, el);
+          }
+      };
+      </script>
   </body>
 </html>
