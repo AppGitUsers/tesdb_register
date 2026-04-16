@@ -415,6 +415,8 @@ def admin_dashboard(request):
     ).all()
 
     return render(request, 'admin_dashboard.html', {
+        'staffs': Staff.objects.all(),
+        'courses': Course.objects.all(),
         'stats':                  stats,
         'dashboards' :            dashboards,
         'all_students':           Student.objects.select_related('course', 'staff', 'batch').all(),
@@ -1134,11 +1136,20 @@ def studentprogress_dashboard():
     print(f"{topics_count}, {finished_topics}, {s.student_name}")
     
 
-@login_required
 def dashboard_view(request):
-    dashboards = StudentProgressDashboard.objects.select_related("student").all()
-    return render(request, "dashboard.html", {"dashboards": dashboards})
 
+    dashboards = StudentProgressDashboard.objects.select_related(
+        "student__staff", "student__course"
+    )
+
+    staffs = Staff.objects.all()
+    courses = Course.objects.all()
+
+    return render(request, "dashboard.html", {
+        "dashboards": dashboards,
+        "staffs": staffs,
+        "courses": courses,
+    })
 
 @login_required
 @require_POST

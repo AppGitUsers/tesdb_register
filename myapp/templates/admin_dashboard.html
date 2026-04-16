@@ -1168,9 +1168,69 @@
         <div class="table-card">
           <div class="table-header">
             <div class="table-title">🎯 Placement Readiness</div>
+
+            <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:center;">
+
+              <!-- Search -->
+              <div>
+                <label style="font-size:12px; color:gray;">Search</label><br>
+                <input type="text" id="progress-search" class="search-box"
+                  placeholder="Search student..."
+                  oninput="filterProgress()" />
+              </div>
+
+              <!-- Staff Filter -->
+              <div>
+                <label style="font-size:12px; color:gray;">Staff</label><br>
+                <select id="staff-filter" class="search-box" onchange="updateCourses(); filterProgress()">
+                  <option value="">All Staff</option>
+                  <option value="unassigned">Unassigned</option>
+                  {% for staff in staffs %}
+                    <option 
+                      value="{{ staff.staff_name|lower }}"
+                      data-courses="{% for c in staff.courses.all %}{{ c.course_name|lower }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                    >
+                      {{ staff.staff_name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <!-- Course Filter -->
+              <div>
+                <label style="font-size:12px; color:gray;">Course</label><br>
+                <select id="course-filter" class="search-box" onchange="filterProgress()">
+                  <option value="">All Courses</option>
+                  {% for course in courses %}
+                    <option value="{{ course.course_name|lower }}">{{ course.course_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <!-- Ready Filter -->
+              <div>
+                <label style="font-size:12px; color:gray;">Ready Status</label><br>
+                <select id="ready-filter" class="search-box" onchange="filterProgress()">
+                  <option value="">All</option>
+                  <option value="ready">Ready</option>
+                  <option value="learning">Learning</option>
+                </select>
+              </div>
+
+              <!-- Placement Filter -->
+              <div>
+                <label style="font-size:12px; color:gray;">Placement</label><br>
+                <select id="placed-filter" class="search-box" onchange="filterProgress()">
+                  <option value="">All</option>
+                  <option value="placed">Placed</option>
+                  <option value="not">Not Placed</option>
+                </select>
+              </div>
+
+            </div>
           </div>
 
-          <table>
+          <table id="progress-table">
             <thead>
               <tr>
                 <th>Student</th>
@@ -1186,9 +1246,14 @@
 
             <tbody>
               {% for d in dashboards %}
-              <tr>
+              <tr 
+                data-ready="{{ d.ready_to_placement|yesno:'ready,learning' }}" 
+                data-placed="{{ d.placed|yesno:'placed,not' }}"
+                data-staff="{{ d.student.staff.staff_name|default:'unassigned'|lower }}"
+                data-course="{{ d.student.course.course_name|lower }}"
+              >
                 <td>{{ d.student.student_name }}</td>
-                <td>{{d.student.staff}}</td>
+                <td>{{ d.student.staff.staff_name|default:"Unassigned" }}</td>
                 <td>{{ d.student.course.course_name }}</td>
                 <td>{{ d.total_topics }}</td>
                 <td>{{d.finished_topics}}</td>
@@ -2150,6 +2215,66 @@
           .find((row) => row.startsWith("csrftoken="))
           ?.split("=")[1];
       }
+     function filterProgress() {
+      const search = document.getElementById("progress-search").value.toLowerCase();
+      const ready = document.getElementById("ready-filter").value;
+      const placed = document.getElementById("placed-filter").value;
+      const staff = document.getElementById("staff-filter").value;
+      const course = document.getElementById("course-filter").value;
+
+      const rows = document.querySelectorAll("#progress-table tbody tr");
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+
+        const rowReady = row.getAttribute("data-ready");
+        const rowPlaced = row.getAttribute("data-placed");
+        const rowStaff = row.getAttribute("data-staff");
+        const rowCourse = row.getAttribute("data-course");
+
+        let show = true;
+
+        if (search && !text.includes(search)) show = false;
+        if (ready && rowReady !== ready) show = false;
+        if (placed && rowPlaced !== placed) show = false;
+        if (staff && rowStaff !== staff) show = false;
+        if (course && rowCourse !== course) show = false;
+
+        row.style.display = show ? "" : "none";
+      });
+    }
+    function updateCourses() {
+      const staffSelect = document.getElementById("staff-filter");
+      const courseSelect = document.getElementById("course-filter");
+
+      const selectedOption = staffSelect.options[staffSelect.selectedIndex];
+      const courses = selectedOption.getAttribute("data-courses");
+
+      // Show all courses first
+      for (let option of courseSelect.options) {
+        option.style.display = "block";
+      }
+
+      // If no staff selected
+      if (!courses || staffSelect.value === "") {
+        courseSelect.value = "";
+        return;
+      }
+
+      const allowedCourses = courses.split(",");
+
+      // Hide unwanted courses
+      for (let option of courseSelect.options) {
+        if (option.value === "") continue;
+
+        if (!allowedCourses.includes(option.value)) {
+          option.style.display = "none";
+        }
+      }
+
+      // Reset course selection
+      courseSelect.value = "";
+    }
     </script>
   </body>
 </html>
