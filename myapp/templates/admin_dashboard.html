@@ -523,6 +523,10 @@
       }
       .form-group {
         margin-bottom: 16px;
+        width: 100%;
+      }
+      .form-group input {
+        width: 100%;
       }
       .form-group label {
         display: block;
@@ -585,6 +589,30 @@
         font-size: 14px;
         cursor: pointer;
         font-family: "Space Grotesk", sans-serif;
+      }
+      .excel-download-wrap {
+        position: absolute;
+        top: 40px;
+        bottom: 20px;
+        right: 30px;
+        z-index: 999;
+      }
+
+      .excel-btn {
+        background: linear-gradient(135deg, #6c63ff, #ff6584);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s;
+      }
+
+      .excel-btn:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
       }
 
       /* Activity Feed */
@@ -802,9 +830,40 @@
           grid-template-columns: 1fr 1fr;
         }
       }
+      #global-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0a0a0f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+
+      /* Spinner */
+      .loader {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #2a2a3d;
+        border-top: 4px solid #6c63ff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
     </style>
   </head>
   <body>
+    <div id="global-loader">
+      <div class="loader"></div>
+    </div>
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-logo">
@@ -848,6 +907,10 @@
       <div class="nav-section-label">Attendance</div>
       <a href="#" class="nav-item" onclick="showSection('attendance', this)">
         <span class="icon">📅</span> Attendance
+      </a>
+      <div class="nav-section-label">Finance</div>
+      <a href="#" class="nav-item" onclick="showSection('payroll', this)">
+        <span class="icon">💰</span> Payroll
       </a>
 
       <div class="nav-section-label">System</div>
@@ -1162,7 +1225,7 @@
             </table>
           </div>
         </div>
-  <!-- ===================== STUDENT DASHBOARD ===================== -->
+        <!-- ===================== STUDENT DASHBOARD ===================== -->
         <div class="section-title">📊 Student Progress Overview</div>
 
         <div class="table-card">
@@ -1196,18 +1259,18 @@
                 <!-- READY STATUS -->
                 <td>
                   {% if d.ready_to_placement %}
-                    <span class="tag tag-green">Ready</span>
+                  <span class="tag tag-green">Ready</span>
                   {% else %}
-                    <span class="tag tag-orange">Learning</span>
+                  <span class="tag tag-orange">Learning</span>
                   {% endif %}
                 </td>
 
                 <!-- PLACED -->
                 <td>
                   {% if d.placed %}
-                    <span class="tag tag-green">Placed 🎉</span>
+                  <span class="tag tag-green">Placed 🎉</span>
                   {% else %}
-                    <span class="tag tag-red">Not Yet</span>
+                  <span class="tag tag-red">Not Yet</span>
                   {% endif %}
                 </td>
 
@@ -1219,7 +1282,10 @@
 
               {% empty %}
               <tr>
-                <td colspan="6" style="text-align:center; padding:30px; color:var(--muted);">
+                <td
+                  colspan="6"
+                  style="text-align: center; padding: 30px; color: var(--muted)"
+                >
                   No student progress data available
                 </td>
               </tr>
@@ -1665,11 +1731,13 @@
       <div id="section-attendance" class="tab-content">
         <div class="top-header">
           <div class="page-title">Attendance</div>
-            <input type="date"
-              class="search-box"
-              style="width:160px"
-              value="{{ selected_date|date:'Y-m-d' }}"
-              onchange="changeDate(this.value)">
+          <input
+            type="date"
+            class="search-box"
+            style="width: 160px"
+            value="{{ selected_date|date:'Y-m-d' }}"
+            onchange="changeDate(this.value)"
+          />
         </div>
         <div class="grid-2">
           <div class="table-card">
@@ -1756,16 +1824,20 @@
                   <td><strong>{{ a.date }}</strong></td>
                   <td>
                     {% if a.login %}
-                      <span class="tag tag-orange">↑ {{ a.login|time:"H:i" }}</span>
+                    <span class="tag tag-orange"
+                      >↑ {{ a.login|time:"H:i" }}</span
+                    >
                     {% else %}
-                      <span style="color:var(--muted)">—</span>
+                    <span style="color: var(--muted)">—</span>
                     {% endif %}
                   </td>
                   <td>
                     {% if a.logout %}
-                      <span class="tag tag-green">✓ {{ a.logout|time:"H:i" }}</span>
+                    <span class="tag tag-green"
+                      >✓ {{ a.logout|time:"H:i" }}</span
+                    >
                     {% else %}
-                      <span style="color:var(--muted)">—</span>
+                    <span style="color: var(--muted)">—</span>
                     {% endif %}
                   </td>
                 </tr>
@@ -1786,6 +1858,75 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+      <!-- ===================== PAYROLL ===================== -->
+      <div id="section-payroll" class="tab-content">
+        <div class="top-header">
+          <div class="page-title">Payroll Management</div>
+        </div>
+        <div class="excel-download-wrap">
+          <a
+            href="/export-payroll/?month={{ selected_month }}"
+            class="excel-btn"
+          >
+            ⬇ Download Excel
+          </a>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">💰 Staff Payroll</div>
+
+            <!-- <a href="/export-payroll/?month={{ selected_month }}" class="table-action">
+                ⬇ Download Excel
+              </a> -->
+            <input
+              type="month"
+              id="month-filter"
+              value="{{ selected_month }}"
+              onchange="changeMonth(this.value)"
+              class="search-box"
+            />
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Staff</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>%</th>
+                <th>Salary</th>
+                <th>Deduction</th>
+                <th>Net</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for s in staff_summary %}
+              <tr>
+                <td>{{ s.staff.staff_name }}</td>
+                <td>{{ s.present }}</td>
+                <td>{{ s.absent }}</td>
+                <td>{{ s.pct }}%</td>
+                <td>₹{{ s.salary }}</td>
+                <td>₹{{ s.deduction }}</td>
+                <td>₹{{ s.net_salary }}</td>
+
+                <td>
+                  <button
+                    class="table-action"
+                    onclick="markPaid({{ s.staff.staff_id }}, '{{ selected_month }}', this)"
+                  >
+                    {% if s.is_paid %} Undo {% else %} Mark Paid {% endif %}
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
     </main>
@@ -1994,22 +2135,33 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Password</label
-              ><input
+              <label>Password</label>
+              <input
                 name="password"
                 type="password"
                 required
                 placeholder="Min 8 chars"
               />
             </div>
+
             <div class="form-group">
-              <label>Courses</label>
-              <select name="courses" multiple style="height: 80px">
-                {% for c in all_courses %}
-                <option value="{{ c.course_id }}">{{ c.course_name }}</option>
-                {% endfor %}
-              </select>
+              <label>Salary</label>
+              <input
+                name="salary"
+                type="number"
+                required
+                placeholder="Enter salary (₹)"
+              />
             </div>
+          </div>
+
+          <div class="form-group">
+            <label>Courses</label>
+            <select name="courses" multiple style="height: 80px">
+              {% for c in all_courses %}
+              <option value="{{ c.course_id }}">{{ c.course_name }}</option>
+              {% endfor %}
+            </select>
           </div>
           <div class="modal-actions">
             <button
@@ -2026,15 +2178,38 @@
     </div>
 
     <script>
+      window.addEventListener("load", function () {
+        document.getElementById("global-loader").style.display = "none";
+      });
       function showSection(name, el) {
+        document.getElementById("global-loader").style.display = "flex";
+
         document
           .querySelectorAll(".tab-content")
           .forEach((s) => s.classList.remove("active"));
         document
           .querySelectorAll(".nav-item")
           .forEach((i) => i.classList.remove("active"));
+
         document.getElementById("section-" + name).classList.add("active");
         if (el) el.classList.add("active");
+
+        const url = new URL(window.location.href);
+
+        url.searchParams.set("section", name);
+
+        if (name === "attendance") {
+          url.searchParams.set("date", getToday());
+          url.searchParams.delete("month");
+        } else if (name === "payroll") {
+          url.searchParams.set("month", getCurrentMonth());
+          url.searchParams.delete("date");
+        } else {
+          url.searchParams.delete("date");
+          url.searchParams.delete("month");
+        }
+
+        window.location.href = url.toString();
       }
 
       function openModal(id) {
@@ -2146,19 +2321,91 @@
           ?.split("=")[1];
       }
 
-      function changeDate(date){
-        window.location.href = "/admin-dashboard/?date=" + date + "&section=attendance";
+      function changeDate(date) {
+        document.getElementById("global-loader").style.display = "flex";
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("date", date);
+        url.searchParams.set("section", "attendance");
+
+        window.location.href = url.toString();
       }
 
-      window.onload = function() {
-          const params = new URLSearchParams(window.location.search);
-          const section = params.get("section");
+      window.onload = function () {
+        const params = new URLSearchParams(window.location.search);
+        const section = params.get("section") || "dashboard";
 
-          if(section){
-              const el = document.querySelector(`[onclick*="${section}"]`);
-              showSection(section, el);
-          }
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((s) => s.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((i) => i.classList.remove("active"));
+
+        document.getElementById("section-" + section).classList.add("active");
+
+        const el = document.querySelector(`.nav-item[onclick*="${section}"]`);
+        if (el) el.classList.add("active");
       };
-      </script>
+
+      function changeMonth(value) {
+        document.getElementById("global-loader").style.display = "flex";
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("section", "payroll");
+        url.searchParams.set("month", value);
+
+        window.location.href = url.toString();
+      }
+
+      function markPaid(staff_id, month, btn) {
+        fetch("/mark-paid/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken(),
+          },
+          body: JSON.stringify({
+            staff_id: staff_id,
+            month: month,
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.status === "success") {
+              if (data.is_paid) {
+                btn.innerText = "Undo";
+                btn.style.color = "#43e97b";
+              } else {
+                btn.innerText = "Mark Paid";
+                btn.style.color = "";
+              }
+            }
+          })
+          .catch((err) => console.error(err));
+      }
+      function getCSRFToken() {
+        let name = "csrftoken";
+        let cookies = document.cookie.split(";");
+
+        for (let cookie of cookies) {
+          cookie = cookie.trim();
+          if (cookie.startsWith(name + "=")) {
+            return decodeURIComponent(cookie.substring(name.length + 1));
+          }
+        }
+        return null;
+      }
+
+      function getCurrentMonth() {
+        const d = new Date();
+        return d.toISOString().slice(0, 7);
+      }
+
+      function getToday() {
+        const d = new Date();
+        return d.toISOString().split("T")[0];
+      }
+    </script>
   </body>
 </html>

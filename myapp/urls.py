@@ -83,6 +83,8 @@ urlpatterns = [
      path("apply-job/<int:company_id>/", views.apply_job, name="apply_job"),
      path("website/", views.website, name="website"),
      path("placements/", views.placement_page, name="placement_page"),
+     path('mark-paid/', views.mark_paid),
+     path('export-payroll/', views.export_payroll_excel, name='export_payroll'),
 
     # Home — must be last
     path('', views.home, name='home'),

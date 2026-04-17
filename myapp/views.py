@@ -8,7 +8,8 @@ from django.http import FileResponse
 from .models import (
     Student, StudentTopicProgress, Staff, CourseTopic,
     Attendance, StudentAttendance, Batch, Course,
-    StaffCourseProgress, StaffLeave, StaffLeaveUsage,CompanyInterview,StudentProgressDashboard,JobApplication
+    StaffCourseProgress, StaffLeave, StaffLeaveUsage,
+    CompanyInterview,StudentProgressDashboard,JobApplication,Payroll
 )
 from django.contrib import messages
 from django.forms import modelformset_factory
@@ -20,6 +21,7 @@ from datetime import date, datetime
 import logging
 import json
 import calendar
+from calendar import monthrange
 import os
 import uuid
 from dateutil.relativedelta import relativedelta
@@ -29,6 +31,7 @@ import urllib.parse
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 logger = logging.getLogger(__name__)
+import openpyxl
 
 
 def home(request):
@@ -424,6 +427,55 @@ def admin_dashboard(request):
     "student", "student__course"
     ).all()
 
+    selected_month = request.GET.get("month")
+
+    if selected_month:
+        payroll_date = datetime.strptime(selected_month, "%Y-%m").date()
+    else:
+        payroll_date = localdate()
+
+    staff_summary = []
+
+    for staff in Staff.objects.all():
+
+        total_days = monthrange(payroll_date.year, payroll_date.month)[1]
+
+        present = Attendance.objects.filter(
+            staff=staff,
+            date__year=payroll_date.year,
+            date__month=payroll_date.month
+        ).values('date').distinct().count()
+
+        absent = max(total_days - present, 0)
+
+        salary = staff.salary or 0
+
+        per_day = salary / total_days if total_days else 0
+        deduction = int(absent * per_day)
+        net_salary = int(salary - deduction)
+
+        payroll = Payroll.objects.filter(
+            staff=staff,
+            month=payroll_date.replace(day=1)
+        ).first()
+
+        if payroll:
+            present = payroll.present_days
+            absent = payroll.absent_days
+            salary = payroll.salary
+            deduction = payroll.deduction
+            net_salary = payroll.net_salary
+
+        staff_summary.append({
+            "staff": staff,
+            "present": present,
+            "absent": absent,
+            "pct": round((present / total_days) * 100) if total_days else 0,
+            "salary": salary,
+            "deduction": deduction,
+            "net_salary": net_salary,
+            "is_paid": payroll.is_paid if payroll else False
+        })
     return render(request, 'admin_dashboard.html', {
         'stats':                  stats,
         'dashboards' :            dashboards,
@@ -437,6 +489,8 @@ def admin_dashboard(request):
         'all_staff_attendance':   all_staff_attendance,
         'today': selected_date.strftime("%Y-%m-%d"),
         'selected_date': selected_date,
+        'staff_summary': staff_summary,
+        'selected_month': payroll_date.strftime("%Y-%m"),
     })
 
 
@@ -522,11 +576,13 @@ def admin_add_staff(request):
                 messages.error(request, 'Username already exists.')
                 return redirect('admin_dashboard')
             user  = User.objects.create_user(username=username, password=request.POST['password'])
+            salary = int(request.POST.get("salary") or 0)
             staff = Staff.objects.create(
                 user=user,
                 staff_name=request.POST['staff_name'].strip(),
                 staff_email=request.POST['staff_email'].strip(),
                 contact=request.POST.get('contact', '').strip(),
+                salary=salary,
             )
             course_ids = request.POST.getlist('courses')
             if course_ids:
@@ -1336,3 +1392,202 @@ def edit_company(request, id):
         company.description    = request.POST.get("description")
         company.save()
     return redirect("placement_dashboard")
+
+# @staff_member_required
+# def payroll_dashboard(request):
+
+#     selected_month = request.GET.get('month')
+
+#     if selected_month:
+#         payroll_date = datetime.strptime(selected_month, "%Y-%m").date()
+#     else:
+#         payroll_date = localdate()
+
+#     staff_summary = []
+
+#     for staff in Staff.objects.all():
+
+#         total_days = monthrange(payroll_date.year, payroll_date.month)[1]
+
+#         present = Attendance.objects.filter(
+#             staff=staff,
+#             date__year=payroll_date.year,
+#             date__month=payroll_date.month
+#         ).values('date').distinct().count()
+
+#         absent = max(total_days - present, 0)
+
+#         salary = staff.salary or 0
+
+#         per_day = salary / total_days if total_days else 0
+#         deduction = int(absent * per_day)
+#         net_salary = int(salary - deduction)
+
+#         payroll = Payroll.objects.filter(
+#             staff=staff,
+#             month=payroll_date.replace(day=1)
+#         ).first()
+
+#         if payroll:
+#             present = payroll.present_days
+#             absent = payroll.absent_days
+#             salary = payroll.salary
+#             deduction = payroll.deduction
+#             net_salary = payroll.net_salary
+
+#         staff_summary.append({
+#             'staff': staff,
+#             'total_days': total_days,
+#             'present': present,
+#             'absent': absent,
+#             'salary': salary,
+#             'deduction': deduction,
+#             'net_salary': net_salary,
+#             'is_paid': payroll.is_paid if payroll else False
+#         })
+
+#     return render(request, "payroll.html", {
+#         "staff_summary": staff_summary,
+#         "selected_month": payroll_date.strftime("%Y-%m")
+#     })
+
+
+# @require_POST
+# def pay_salary(request):
+#     data = json.loads(request.body)
+
+#     staff_id = data.get('staff_id')
+#     month = data.get('month')
+
+#     staff = Staff.objects.get(staff_id=staff_id)
+#     payroll_date = datetime.strptime(month, "%Y-%m").date().replace(day=1)
+
+#     payroll, created = Payroll.objects.get_or_create(
+#         staff=staff,
+#         month=payroll_date
+#     )
+
+#     payroll.total_days = data.get('total_days')
+#     payroll.present_days = data.get('present')
+#     payroll.absent_days = data.get('absent')
+#     payroll.salary = data.get('salary')
+#     payroll.deduction = data.get('deduction')
+#     payroll.net_salary = data.get('net_salary')
+
+#     payroll.is_paid = True
+#     payroll.paid_on = now()
+#     payroll.save()
+
+#     return JsonResponse({"status": "success"})
+
+@require_POST
+def mark_paid(request):
+    data = json.loads(request.body)
+
+    staff_id = data.get("staff_id")
+    month = data.get("month")
+
+    staff = get_object_or_404(Staff, staff_id=staff_id)
+    payroll_date = datetime.strptime(month, "%Y-%m").date().replace(day=1)
+
+    total_days = monthrange(payroll_date.year, payroll_date.month)[1]
+
+    present = Attendance.objects.filter(
+        staff=staff,
+        date__year=payroll_date.year,
+        date__month=payroll_date.month
+    ).values('date').distinct().count()
+
+    absent = max(total_days - present, 0)
+
+    salary = staff.salary or 0
+    per_day = salary / total_days if total_days else 0
+    deduction = int(absent * per_day)
+    net_salary = int(salary - deduction)
+
+    payroll, created = Payroll.objects.get_or_create(
+        staff=staff,
+        month=payroll_date,
+        defaults={
+            "total_days": total_days,
+            "present_days": present,
+            "absent_days": absent,
+            "salary": salary,
+            "deduction": deduction,
+            "net_salary": net_salary
+        }
+    )
+
+    if not created:
+        payroll.total_days = total_days
+        payroll.present_days = present
+        payroll.absent_days = absent
+        payroll.salary = salary
+        payroll.deduction = deduction
+        payroll.net_salary = net_salary
+
+    payroll.is_paid = not payroll.is_paid
+    payroll.paid_on = now()
+    payroll.save()
+
+    return JsonResponse({
+        "status": "success",
+        "is_paid": payroll.is_paid
+    })
+
+def export_payroll_excel(request):
+
+    month = request.GET.get("month")
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Payroll"
+
+    # Header
+    ws.append([
+        "Staff Name",
+        "Present",
+        "Absent",
+        "%",
+        "Salary",
+        "Deduction",
+        "Net Salary",
+        "Status"
+    ])
+
+    if month:
+        month_date = datetime.strptime(month, "%Y-%m").date().replace(day=1)
+        payrolls = Payroll.objects.filter(month=month_date)
+    else:
+        payrolls = Payroll.objects.all()
+
+    for p in payrolls:
+
+        present = p.present_days or 0
+        absent = p.absent_days or 0
+        salary = p.salary or 0
+        deduction = p.deduction or 0
+        net_salary = p.net_salary or 0
+
+        total = present + absent
+        pct = round((present / total) * 100, 2) if total else 0
+
+        ws.append([
+            p.staff.staff_name if p.staff else "",
+            present,
+            absent,
+            f"{pct}%",
+            salary,
+            deduction,
+            net_salary,
+            "Paid" if p.is_paid else "Pending"
+        ])
+
+    # Response
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename=payroll_{month}.xlsx'
+
+    wb.save(response)
+    return response

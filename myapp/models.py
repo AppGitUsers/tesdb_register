@@ -21,6 +21,8 @@ class Staff(models.Model):
     staff_email = models.EmailField(unique=True)
     courses = models.ManyToManyField("Course", related_name="staffs")
         
+    salary = models.IntegerField(null=True, blank=True)
+
     #bio
     def __str__(self):
         return self.staff_name
@@ -313,3 +315,27 @@ class StudentProgressDashboard(models.Model):
         return f"{self.student.student_name} Dashboard"
     
     
+class Payroll(models.Model):
+    staff = models.ForeignKey('Staff', on_delete=models.CASCADE)
+    
+    month = models.DateField()   # 1–12
+    # year = models.IntegerField()    # ✅ FIXED
+
+    total_days = models.IntegerField()
+    present_days = models.IntegerField()
+    absent_days = models.IntegerField()
+    
+    salary = models.FloatField()
+    deduction = models.FloatField()
+    net_salary = models.FloatField()
+    
+    is_paid = models.BooleanField(default=False)
+    paid_on = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('staff', 'month')
+
+    # def __str__(self):
+    #     return f"{self.staff.staff_name} - {self.month}/{self.year}"
+    def __str__(self):
+        return f"{self.staff.staff_name} - {self.month.strftime('%B %Y')}"
